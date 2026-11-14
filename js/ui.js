@@ -44,15 +44,41 @@ export function langName(sub) {
 }
 
 // ---------- toasts ----------
-export function toast(message, tone = 'ok') {
+/**
+ * Shows a short message. `action` ({ label, run }) adds a button, used to jump to the other side
+ * of what just happened (for example "See it as Lumivirta Energy"). Toasts with an action stay
+ * longer and pause while hovered or focused.
+ */
+export function toast(message, tone = 'ok', action = null) {
   const region = document.getElementById('toasts');
   if (!region) return;
   const el = document.createElement('div');
   el.className = `toast toast--${tone}`;
-  el.textContent = message;
+  const text = document.createElement('span');
+  text.textContent = message;
+  el.appendChild(text);
+  let hold = false;
+  if (action) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'toast__action';
+    btn.textContent = action.label;
+    btn.addEventListener('click', () => {
+      el.remove();
+      action.run();
+    });
+    el.appendChild(btn);
+    ['mouseenter', 'focusin'].forEach((e) => el.addEventListener(e, () => (hold = true)));
+    ['mouseleave', 'focusout'].forEach((e) => el.addEventListener(e, () => (hold = false)));
+  }
   region.appendChild(el);
-  setTimeout(() => el.classList.add('is-leaving'), 3800);
-  setTimeout(() => el.remove(), 4300);
+  const life = action ? 9000 : 3800;
+  const leave = () => {
+    if (hold) return setTimeout(leave, 1000);
+    el.classList.add('is-leaving');
+    setTimeout(() => el.remove(), 500);
+  };
+  setTimeout(leave, life);
 }
 
 // ---------- dialogs ----------

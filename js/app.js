@@ -1,18 +1,20 @@
-import { load, subscribe, getState, resetDemo } from './store.js';
+import { load, subscribe, getState, resetDemo, onServerError, isServerMode } from './store.js';
 import { tabNav, toast, confirmDialog, fmtDate } from './ui.js';
 import * as participantView from './views/participant.js';
-import * as recruiterView from './views/recruiter.js';
+import * as hostView from './views/host.js';
 import * as organizerView from './views/organizer.js';
-import * as privacyView from './views/privacy.js';
 import * as guideView from './views/guide.js';
+import { counterpart } from './sides.js';
 
 const VIEWS = {
   participant: participantView,
-  recruiter: recruiterView,
+  host: hostView,
   organizer: organizerView,
-  privacy: privacyView,
   guide: guideView,
 };
+
+// Old links: #/recruiter/... is now the Employer side; the Privacy & EU AI Act view was removed.
+const ROUTE_ALIASES = { recruiter: 'host', privacy: 'participant' };
 
 const main = document.getElementById('main');
 const contextbar = document.getElementById('contextbar');
@@ -25,8 +27,24 @@ function parseRoute() {
 }
 
 let lastRouteKey = '';
+let currentRoute = { role: 'participant', tab: 'board', arg: null };
+
+// Switching sides from a challenge also selects that challenge's company on the Employer side.
+roles.addEventListener('click', (e) => {
+  const a = e.target.closest('a[data-role]');
+  if (!a || a.dataset.role === currentRoute.role) return;
+  const target = counterpart(currentRoute, a.dataset.role);
+  if (!target.run) return; // a plain link is enough
+  e.preventDefault();
+  target.run();
+});
 
 function render() {
+  const [, rawRole, ...rest] = (location.hash || '').split('/');
+  if (ROUTE_ALIASES[rawRole]) {
+    location.replace(`#/${[ROUTE_ALIASES[rawRole], ...rest].join('/')}`);
+    return;
+  }
   const state = getState();
   const route = parseRoute();
   const view = VIEWS[route.role];
@@ -39,13 +57,19 @@ function render() {
   const focusId = sameRoute && document.activeElement && document.activeElement.id;
   const scrollY = window.scrollY;
 
+  // Talent / Employer switch: each link points at the matching screen on the other side.
   roles.querySelectorAll('a').forEach((a) => {
-    if (a.dataset.role === route.role) a.setAttribute('aria-current', 'page');
+    const current = a.dataset.role === route.role;
+    if (current) a.setAttribute('aria-current', 'page');
     else a.removeAttribute('aria-current');
+    a.href = current ? location.hash : counterpart({ ...route, tab }, a.dataset.role).href;
   });
-  const guideLink = document.getElementById('guide-link');
-  if (route.role === 'guide') guideLink.setAttribute('aria-current', 'page');
-  else guideLink.removeAttribute('aria-current');
+  [['guide-link', 'guide'], ['organizer-link', 'organizer']].forEach(([id, role]) => {
+    const link = document.getElementById(id);
+    if (route.role === role) link.setAttribute('aria-current', 'page');
+    else link.removeAttribute('aria-current');
+  });
+  currentRoute = { ...route, tab };
 
   contextbar.innerHTML = `<div class="persona">${view.context(state)}</div>${tabNav(route.role, tabs, tab)}`;
   main.innerHTML = view.render(state, tab, route.arg);
@@ -61,7 +85,7 @@ function render() {
   } else {
     window.scrollTo(0, 0);
     if (lastRouteKey) main.focus({ preventScroll: true });
-    const label = (tabs.find((t) => t.id === tab)?.label || view.hiddenTabLabels?.[tab] || '').replace(' ✓', '');
+    const label = (view.pageTitle?.(state, tab, route.arg) || tabs.find((t) => t.id === tab)?.label || view.hiddenTabLabels?.[tab] || '').replace(' ✓', '');
     document.title = `${label ? `${label}, ` : ''}${route.role === 'guide' ? 'Guide, ' : ''}Skillink`;
   }
   lastRouteKey = routeKey;
@@ -70,7 +94,7 @@ function render() {
 document.getElementById('reset-demo').addEventListener('click', async () => {
   const ok = await confirmDialog({
     title: 'Reset demo data?',
-    message: 'Everything you changed in this browser goes back to the original Espoo demo data. Use this between demo runs.',
+    message: 'Everything you changed goes back to the original Espoo demo data. Use this between demo runs.',
     confirmLabel: 'Reset demo data',
   });
   if (!ok) return;
@@ -79,6 +103,8 @@ document.getElementById('reset-demo').addEventListener('click', async () => {
 });
 
 window.addEventListener('hashchange', render);
-load();
+onServerError((msg) => toast(msg, 'error'));
+await load(); // the Scala server's state if it is running, otherwise this browser's
+document.documentElement.dataset.mode = isServerMode() ? 'server' : 'offline';
 subscribe(render);
 render();

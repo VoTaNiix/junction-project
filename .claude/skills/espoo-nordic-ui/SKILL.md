@@ -12,20 +12,28 @@ values in components.
 
 ## Palette
 
+This project uses the **Espoo blue** palette with the layout and components ported from the
+"Approach 2" design (soft white cards, pill controls, 18–22px radii, tight display type). A
+sibling copy, `Junction_Project`, uses Approach 2's green palette; the two differ only in the
+"Brand" and "Neutrals" blocks of `css/tokens.css` plus the favicon colour. Components use the
+semantic `--brand-*` tokens, never a palette name, so a palette swap never touches `app.css`.
+
 | Token | Hex | Use |
 |---|---|---|
-| `--trust-900` | `#003580` | Espoo deep blue: header, headings, primary buttons, Talent & Hiring badge |
-| `--trust-600` | `#0050C8` | Links, focus rings, active states |
-| `--birch-50`  | `#F7F6F2` | Page background (warm birch/sand) |
-| `--birch-200` | `#E6E2D6` | Hairlines, quiet surfaces |
+| `--brand-900` | `#003580` | Espoo deep blue: headings, primary buttons, active tab and role, Talent & Hiring badge |
+| `--brand-700` | `#0050C8` | Links, focus rings |
+| `--brand-100` / `--brand-50` | `#E3ECFA` / `#F0F5FD` | Soft buttons, notes, page-intro bands |
+| `--paper` / `--paper-2` | `#F7F6F2` / `#EFEDE6` | Page background (warm birch/sand) / quiet surfaces |
+| `--hair` | `#E6E2D6` | Hairlines |
+| `--ink`       | `#111827` | Body text, Open Format badge (outlined) |
 | `--pine-700`  | `#1B5E20` | Human verification and "confirmed" badges only |
 | `--teal-800`  | `#0B5563` | R&D & Co-Creation badge |
 | `--ochre-800` | `#7A3E00` | Pilot & Project badge |
-| `--ink`       | `#111827` | Body text, Open Format badge (outlined) |
 
 Never use purple gradients, glassmorphism, neon accents or decorative gradient washes.
 Colour carries meaning: blue = action/trust, pine = a human confirmed it, amber = waiting,
-red = declined/destructive.
+red = declined/destructive. Challenge cards get a pale top band tinted by their first
+collaboration format; it is decorative (`aria-hidden`), the format badges carry the meaning.
 
 ## Collaboration format badges
 
@@ -47,16 +55,18 @@ copy is sentence case.
 - Headings: **Schibsted Grotesk** (a Nordic grotesk), weights 600–800, tight tracking on display sizes.
 - Body and UI: **Atkinson Hyperlegible Next**, chosen for legibility for readers of many
   first languages.
-- Sentence case everywhere except the four format names. No all-caps eyebrow labels, no
-  single highlighted word in headlines, no arrows appended to button text.
+- Sentence case everywhere except the four format names. Small eyebrow labels (`.eyebrow`)
+  are allowed in sentence case, never all caps. No single highlighted word in headlines (the
+  hero's quieter last line is a whole line), no arrows appended to button text.
+- People are never shown with initials or photos: the review card avatar is a generic icon.
 - Body line length under ~72 characters.
 
 ## Layout and components
 
 - Hierarchy through spacing and weight, not boxes inside boxes. Not every group is a card.
 - Status pills always pair colour with a text label (never colour alone).
-- The role switcher in the header is a segmented control: one click to change perspective
-  (Participant / solver, Challenge host, Event organizer, Privacy & EU AI Act), current role
+- The side switcher in the header is a two-option segmented control: one click to change side
+  (Talent, Employer), with Event team as a separate header link; current side
   clearly marked with `aria-current`.
 - Forms: visible labels, helper text under the label, errors stated in plain words with how to fix.
 
