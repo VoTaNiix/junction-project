@@ -2,16 +2,20 @@
 // persistence, identity rules, the request cap and the purge stay in one place.
 import { buildSeed } from './seed.js';
 
-const KEY = 'skillink.v1';
+const KEY = 'skillink.v2';
+const OLD_KEYS = ['skillink.v1'];
+const VERSION = 2;
 export const REQUEST_CAP = 5;
 export const OPT_IN_TARGET = 0.4;
 
 // Keys that must never exist anywhere in state (EU AI Act / GDPR guardrail, see the
-// eu-ai-act-compliance skill). The Privacy Inspector audits the live state against this list.
+// eu-ai-act-and-fairness skill). The Privacy view audits the live state against this list.
+// The last group blocks pedigree signals that would bias B2B and R&D matchmaking.
 export const FORBIDDEN_KEYS = [
   'nationality', 'ethnicity', 'ethnicBackground', 'race', 'age', 'birthDate', 'dateOfBirth',
   'gender', 'sex', 'photo', 'photoUrl', 'avatar', 'religion', 'maritalStatus', 'disability',
   'cv', 'resume', 'score', 'matchScore', 'rank', 'rating', 'fitScore',
+  'pitchDeck', 'logo', 'logoUrl', 'companySize', 'employeeCount', 'fundingStage', 'revenue',
 ];
 
 let state = null;
@@ -30,7 +34,7 @@ export function load() {
     const raw = localStorage.getItem(KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (parsed && parsed.version === 1) {
+      if (parsed && parsed.version === VERSION) {
         state = parsed;
         return state;
       }
@@ -39,6 +43,11 @@ export function load() {
     /* fall through to seed */
   }
   state = buildSeed();
+  try {
+    OLD_KEYS.forEach((k) => localStorage.removeItem(k));
+  } catch {
+    /* ignore */
+  }
   persist();
   return state;
 }
@@ -106,7 +115,7 @@ export function revealedTo(companyId, participantId) {
 
 export function pseudoLabel(participantId) {
   const p = participant(participantId);
-  return p ? `Participant #${p.pseudo}` : 'Participant (deleted)';
+  return p ? `Solver #${p.pseudo}` : 'Solver (deleted)';
 }
 
 // ---------- meetings ----------
@@ -132,7 +141,7 @@ export function existingMeeting(participantId, challengeId) {
   );
 }
 
-export function requestMeeting(participantId, challengeId, slotId) {
+export function requestMeeting(participantId, challengeId, slotId, format) {
   if (activeRequestCount(participantId) >= REQUEST_CAP) {
     return { ok: false, error: `You have used all ${REQUEST_CAP} meeting requests. Cancel one to request another.` };
   }
@@ -143,35 +152,35 @@ export function requestMeeting(participantId, challengeId, slotId) {
   const ch = challenge(challengeId);
   update((s) => {
     s.meetings.push({
-      id: uid('m'), challengeId, companyId: ch.companyId, participantId, slotId,
+      id: uid('m'), challengeId, companyId: ch.companyId, participantId, slotId, format: format || 'open',
       initiator: 'participant', partyStatus: 'requested', organizerStatus: 'pending', createdAt: nowIso(),
     });
-    log('participant', 'requested meeting', `${pseudoLabel(participantId)} → ${company(ch.companyId).name}`);
+    log('solver', 'requested meeting', `${pseudoLabel(participantId)} → ${company(ch.companyId).name}`);
   });
   return { ok: true };
 }
 
-export function inviteParticipant(companyId, participantId, challengeId, slotId) {
+export function inviteParticipant(companyId, participantId, challengeId, slotId, format) {
   if (existingMeeting(participantId, challengeId)) {
-    return { ok: false, error: 'There is already an open conversation with this participant for this challenge.' };
+    return { ok: false, error: 'There is already an open conversation with this solver for this challenge.' };
   }
   if (slotTaken(slotId)) return { ok: false, error: 'That time is already booked. Pick another time.' };
   update((s) => {
     s.meetings.push({
-      id: uid('m'), challengeId, companyId, participantId, slotId,
-      initiator: 'recruiter', partyStatus: 'invited', organizerStatus: 'pending', createdAt: nowIso(),
+      id: uid('m'), challengeId, companyId, participantId, slotId, format: format || 'open',
+      initiator: 'host', partyStatus: 'invited', organizerStatus: 'pending', createdAt: nowIso(),
     });
-    log('recruiter', 'invited participant', `${company(companyId).name} → ${pseudoLabel(participantId)}`);
+    log('host', 'invited solver', `${company(companyId).name} → ${pseudoLabel(participantId)}`);
   });
   return { ok: true };
 }
 
-/** The counterparty answers: participant answers invites, recruiter answers requests. */
+/** The counterparty answers: the solver answers invites, the host answers requests. */
 export function respondToMeeting(meetingId, accept) {
   update((s) => {
     const m = byId(s.meetings, meetingId);
     if (!m) return;
-    const actor = m.initiator === 'participant' ? 'recruiter' : 'participant';
+    const actor = m.initiator === 'participant' ? 'host' : 'solver';
     m.partyStatus = accept ? 'accepted' : 'declined';
     m.respondedAt = nowIso();
     log(actor, accept ? 'accepted meeting' : 'declined meeting', `${company(m.companyId).name} / ${pseudoLabel(m.participantId)}`);
@@ -183,7 +192,7 @@ export function cancelMeeting(meetingId) {
     const m = byId(s.meetings, meetingId);
     if (!m) return;
     m.partyStatus = 'cancelled';
-    log('participant', 'cancelled request', `${pseudoLabel(m.participantId)} → ${company(m.companyId).name}`);
+    log('solver', 'cancelled request', `${pseudoLabel(m.participantId)} → ${company(m.companyId).name}`);
   });
 }
 
@@ -193,7 +202,7 @@ export function organizerDecision(meetingId, approve) {
     if (!m) return;
     m.organizerStatus = approve ? 'approved' : 'declined';
     m.organizerAt = nowIso();
-    if (approve && isConfirmed(m) && !s.feedback[m.id]) s.feedback[m.id] = { participant: null, recruiter: null };
+    if (approve && isConfirmed(m) && !s.feedback[m.id]) s.feedback[m.id] = { participant: null, host: null };
     log('organizer', approve ? 'approved meeting' : 'declined meeting', `${company(m.companyId).name} / ${pseudoLabel(m.participantId)}`);
   });
 }
@@ -203,8 +212,8 @@ export function meetingStatus(m) {
   if (m.partyStatus === 'cancelled') return { key: 'cancelled', label: 'Cancelled', tone: 'muted' };
   if (m.partyStatus === 'declined') return { key: 'declined', label: 'Declined', tone: 'danger' };
   if (m.organizerStatus === 'declined') return { key: 'org-declined', label: 'Declined by organizer', tone: 'danger' };
-  if (m.partyStatus === 'requested') return { key: 'requested', label: 'Waiting for company', tone: 'wait' };
-  if (m.partyStatus === 'invited') return { key: 'invited', label: 'Waiting for participant', tone: 'wait' };
+  if (m.partyStatus === 'requested') return { key: 'requested', label: 'Waiting for host', tone: 'wait' };
+  if (m.partyStatus === 'invited') return { key: 'invited', label: 'Waiting for solver', tone: 'wait' };
   if (m.organizerStatus === 'pending') return { key: 'mutual', label: 'Mutual, awaiting organizer', tone: 'info' };
   return { key: 'confirmed', label: 'Confirmed', tone: 'ok' };
 }
@@ -236,6 +245,7 @@ export function saveSubmission(participantId, challengeId, data, submit, opts) {
       return;
     }
     Object.assign(sub, {
+      intent: data.intent || 'open',
       lang: data.lang,
       langOther: data.langOther || '',
       format: data.format,
@@ -247,7 +257,7 @@ export function saveSubmission(participantId, challengeId, data, submit, opts) {
       sub.status = 'submitted';
       sub.submittedAt = nowIso();
       s.consents[participantId] = { purpose: 'event-matchmaking', at: nowIso() };
-      log('participant', 'shared approach', `${pseudoLabel(participantId)} → ${challenge(challengeId).title}`);
+      log('solver', 'shared approach', `${pseudoLabel(participantId)} → ${challenge(challengeId).title}`);
     }
   }, opts);
   return result;
@@ -272,7 +282,7 @@ export function deleteDraft(submissionId) {
 export function createParticipant() {
   update((s) => {
     const n = String(1000 + Math.floor(Math.random() * 8999));
-    const p = { id: `p-${n}`, pseudo: `ESP-${n}`, name: 'New demo participant', email: `participant.${n}@example.com` };
+    const p = { id: `p-${n}`, pseudo: `ESP-${n}`, name: 'New demo solver', email: `solver.${n}@example.com` };
     s.participants.push(p);
     s.currentParticipantId = p.id;
   });
@@ -283,7 +293,7 @@ export function addChallenge(data) {
   const id = uid('ch');
   update((s) => {
     s.challenges.push({ id, createdAt: nowIso(), ...data });
-    log('recruiter', 'published challenge', `${company(data.companyId).name}: ${data.title}`);
+    log('host', 'published challenge', `${company(data.companyId).name}: ${data.title}`);
   });
   return id;
 }
@@ -297,15 +307,15 @@ export function requestCoWriting(companyId, note) {
 // ---------- post-event mutual opt-in ----------
 export function setFeedback(meetingId, side, choice) {
   update((s) => {
-    const f = s.feedback[meetingId] || (s.feedback[meetingId] = { participant: null, recruiter: null });
+    const f = s.feedback[meetingId] || (s.feedback[meetingId] = { participant: null, host: null });
     f[side] = choice;
   });
 }
 
 export function feedbackOutcome(meetingId) {
   const f = state.feedback[meetingId];
-  if (!f || !f.participant || !f.recruiter) return 'waiting';
-  return f.participant === 'continue' && f.recruiter === 'continue' ? 'mutual' : 'closed';
+  if (!f || !f.participant || !f.host) return 'waiting';
+  return f.participant === 'continue' && f.host === 'continue' ? 'mutual' : 'closed';
 }
 
 // ---------- aggregates (anonymous, no individual profiling) ----------
@@ -342,6 +352,9 @@ function emptyPersonAggregates() {
     responsesPerChallenge: {},
     skillSupply: {},
     languages: {},
+    intents: {},
+    meetingFormats: {},
+    confirmedFormats: {},
     meetings: { requested: 0, invited: 0, confirmed: 0, declined: 0 },
     optIn: { mutual: 0, answered: 0, held: 0 },
     byCompany: {},
@@ -356,19 +369,24 @@ function computePersonAggregates(s) {
     (sub.skills || []).forEach((k) => (a.skillSupply[k] = (a.skillSupply[k] || 0) + 1));
     const lang = sub.lang === 'other' ? 'other' : sub.lang;
     a.languages[lang] = (a.languages[lang] || 0) + 1;
+    const it = sub.intent || 'open';
+    a.intents[it] = (a.intents[it] || 0) + 1;
   });
   s.meetings.forEach((m) => {
     if (m.initiator === 'participant') a.meetings.requested += 1;
     else a.meetings.invited += 1;
     if (isConfirmed(m)) a.meetings.confirmed += 1;
     if (m.partyStatus === 'declined' || m.organizerStatus === 'declined') a.meetings.declined += 1;
+    const f = m.format || 'open';
+    a.meetingFormats[f] = (a.meetingFormats[f] || 0) + 1;
+    if (isConfirmed(m)) a.confirmedFormats[f] = (a.confirmedFormats[f] || 0) + 1;
   });
   s.meetings.filter(isConfirmed).forEach((m) => {
     a.optIn.held += 1;
     const f = s.feedback[m.id];
-    if (f && f.participant && f.recruiter) {
+    if (f && f.participant && f.host) {
       a.optIn.answered += 1;
-      if (f.participant === 'continue' && f.recruiter === 'continue') a.optIn.mutual += 1;
+      if (f.participant === 'continue' && f.host === 'continue') a.optIn.mutual += 1;
     }
   });
   s.companies.forEach((c) => {
@@ -382,13 +400,15 @@ function computePersonAggregates(s) {
       responses: subs.length,
       bookmarks,
       requests: ms.filter((m) => m.initiator === 'participant').length,
-      invites: ms.filter((m) => m.initiator === 'recruiter').length,
+      invites: ms.filter((m) => m.initiator === 'host').length,
       mutual: ms.filter(canRevealIdentity).length,
       confirmed: conf.length,
       continued: conf.filter((m) => feedbackOutcome(m.id) === 'mutual').length,
       themes: t.counts,
       questions: t.questions,
       languages: subs.reduce((acc, x) => ((acc[x.lang] = (acc[x.lang] || 0) + 1), acc), {}),
+      intents: subs.reduce((acc, x) => ((acc[x.intent || 'open'] = (acc[x.intent || 'open'] || 0) + 1), acc), {}),
+      confirmedFormats: conf.reduce((acc, m) => ((acc[m.format || 'open'] = (acc[m.format || 'open'] || 0) + 1), acc), {}),
     };
   });
   return a;
@@ -408,8 +428,12 @@ export function aggregates() {
   const archived = state.purge.aggregates;
   const person = archived ? addInto(JSON.parse(JSON.stringify(archived)), live) : live;
   const skillDemand = {};
-  state.challenges.forEach((ch) => ch.escoTags.forEach((k) => (skillDemand[k] = (skillDemand[k] || 0) + 1)));
-  return { ...person, skillDemand };
+  const formatDemand = {};
+  state.challenges.forEach((ch) => {
+    ch.escoTags.forEach((k) => (skillDemand[k] = (skillDemand[k] || 0) + 1));
+    (ch.formats || ['open']).forEach((f) => (formatDemand[f] = (formatDemand[f] || 0) + 1));
+  });
+  return { ...person, skillDemand, formatDemand };
 }
 
 // ---------- 30-day purge ----------
@@ -422,7 +446,7 @@ export function personalDataInventory(s = state) {
     meetings: s.meetings.length,
     feedback: Object.keys(s.feedback).length,
     consents: Object.keys(s.consents).length,
-    recruiterContacts: s.companies.filter((c) => c.recruiterEmail).length,
+    hostContacts: s.companies.filter((c) => c.hostEmail).length,
     decisionLog: s.decisionLog.length,
   };
 }
@@ -441,8 +465,9 @@ export function purgePersonalData() {
     s.coWriteRequests = [];
     s.decisionLog = [];
     s.companies.forEach((c) => {
-      c.recruiter = null;
-      c.recruiterEmail = null;
+      c.hostName = null;
+      c.hostRole = null;
+      c.hostEmail = null;
     });
     s.currentParticipantId = null;
     s.purge.done = true;

@@ -1,6 +1,6 @@
-// Curated subset of the ESCO skills pillar (v1.2), grouped into the six domains Skillink's
+// Curated subset of the ESCO skills pillar (v1.2), grouped into the domains Skillink's
 // Espoo pilot covers. Labels follow ESCO preferred terms where one exists.
-// Tags are chosen by companies and self-declared by participants. Never inferred, never ranked.
+// Tags are chosen by hosts and self-declared by solvers. Never inferred, never ranked.
 
 export const DOMAINS = [
   'Software engineering',
@@ -8,6 +8,8 @@ export const DOMAINS = [
   'AI & data',
   'Hardware & IoT',
   'Service design',
+  'Built environment & circularity',
+  'Research & innovation',
   'B2B operations',
 ];
 
@@ -48,6 +50,10 @@ export const ESCO_SKILLS = [
   { id: 'hw-industrial', label: 'industrial automation', domain: 'Hardware & IoT' },
   { id: 'hw-quantum', label: 'quantum computing', domain: 'Hardware & IoT' },
   { id: 'hw-lidar', label: 'lidar and radar systems', domain: 'Hardware & IoT' },
+  { id: 'hw-microelectronics', label: 'microelectronics', domain: 'Hardware & IoT' },
+  { id: 'hw-cryo', label: 'cryogenics', domain: 'Hardware & IoT' },
+  { id: 'hw-thermal', label: 'perform thermal analysis', domain: 'Hardware & IoT' },
+  { id: 'hw-anomaly', label: 'perform anomaly detection', domain: 'Hardware & IoT' },
 
   // Service design
   { id: 'sd-user-research', label: 'conduct user research', domain: 'Service design' },
@@ -57,6 +63,18 @@ export const ESCO_SKILLS = [
   { id: 'sd-copy', label: 'write plain-language content', domain: 'Service design' },
   { id: 'sd-public', label: 'design public services', domain: 'Service design' },
   { id: 'sd-multilingual', label: 'localise content for multiple languages', domain: 'Service design' },
+
+  // Built environment & circularity
+  { id: 'ce-circular', label: 'circular economy', domain: 'Built environment & circularity' },
+  { id: 'ce-materials', label: 'construction products', domain: 'Built environment & circularity' },
+  { id: 'ce-trace', label: 'implement traceability systems', domain: 'Built environment & circularity' },
+  { id: 'ce-bim', label: 'building information modelling', domain: 'Built environment & circularity' },
+
+  // Research & innovation
+  { id: 'rd-research', label: 'perform scientific research', domain: 'Research & innovation' },
+  { id: 'rd-experiments', label: 'design scientific experiments', domain: 'Research & innovation' },
+  { id: 'rd-proposals', label: 'write research proposals', domain: 'Research & innovation' },
+  { id: 'rd-prototype', label: 'develop prototypes', domain: 'Research & innovation' },
 
   // B2B operations
   { id: 'b2b-onboarding', label: 'manage customer onboarding', domain: 'B2B operations' },
