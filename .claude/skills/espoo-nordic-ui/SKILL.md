@@ -25,7 +25,12 @@ values in components.
 
 Never use purple gradients, glassmorphism, neon accents or decorative gradient washes.
 Colour carries meaning: blue = action/trust, pine = a human confirmed it, amber = waiting,
-red = declined/destructive.
+red = declined/destructive. Preview cards on the problem board take a coloured top edge from
+their first collaboration format; the format badges carry the meaning in text.
+
+This is the original Skillink look, kept after user feedback: a later "Approach 2" redesign
+(sage green, photo hero, big rounded cards) was tried and rejected. It still lives in the
+sibling folder `Junction_Project_Blue`, in Espoo blue.
 
 ## Collaboration format badges
 
@@ -49,15 +54,17 @@ copy is sentence case.
   first languages.
 - Sentence case everywhere except the four format names. No all-caps eyebrow labels, no
   single highlighted word in headlines, no arrows appended to button text.
+- People are never shown with initials or photos.
 - Body line length under ~72 characters.
 
 ## Layout and components
 
 - Hierarchy through spacing and weight, not boxes inside boxes. Not every group is a card.
 - Status pills always pair colour with a text label (never colour alone).
-- The role switcher in the header is a segmented control: one click to change perspective
-  (Participant / solver, Challenge host, Event organizer, Privacy & EU AI Act), current role
-  clearly marked with `aria-current`.
+- The header shows the active account (picture and name) with a Google-style menu that
+  switches to another demo account in one click. Each account sees only the buttons it can use;
+  Guide is the only header link; the current one
+  is marked with `aria-current`.
 - Forms: visible labels, helper text under the label, errors stated in plain words with how to fix.
 
 ## Accessibility (WCAG 2.2 AA)

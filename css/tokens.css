@@ -16,6 +16,11 @@
   --amber-100: #fdf1d6;
   --red-700: #a8231a;
   --red-100: #fbe6e4;
+  /* Collaboration formats (see .claude/skills/espoo-nordic-ui). All text pairs ≥ 7:1. */
+  --teal-800: #0b5563;
+  --teal-100: #ddf0f0;
+  --ochre-800: #7a3e00;
+  --ochre-100: #fbebda;
   --ink: #111827;
   --ink-2: #3a4150;
   --ink-3: #5b6271;
@@ -32,6 +37,11 @@
   --text-3: var(--ink-3);
   --link: var(--trust-600);
   --focus: var(--trust-600);
+  /* Brand aliases, used by inline styles in the views */
+  --brand-900: var(--trust-900);
+  --brand-700: var(--trust-600);
+  --brand-100: var(--trust-100);
+  --brand-50: var(--trust-50);
 
   /* Type */
   --font-display: 'Schibsted Grotesk', 'Segoe UI', system-ui, -apple-system, sans-serif;

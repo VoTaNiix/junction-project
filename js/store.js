@@ -1,6 +1,16 @@
-// Single source of truth for Skillink. All mutations go through this module so that
-// persistence, identity rules, the request cap and the purge stay in one place.
+// Single source of truth for Skillink in the browser. All mutations go through this module so
+// that persistence, identity rules, the request cap and the purge stay in one place.
+//
+// Two modes:
+//  - Server mode (the Scala backend, src/main/scala/skillink): the server owns the state and the
+//    rules. Each change is applied here at once so the page responds instantly, then sent to
+//    POST /api/action as a named action. The server validates it with its own copy of the rules
+//    (Rules.scala) and returns the authoritative state, which replaces ours. If the server rejects
+//    the change, its state wins and the reason is shown.
+//  - Offline mode (any plain static server, e.g. py -m http.server): no /api, so the rules below
+//    run alone and the state lives in localStorage, as before.
 import { buildSeed } from './seed.js';
+import { tr } from './i18n.js';
 
 const KEY = 'skillink.v2';
 const OLD_KEYS = ['skillink.v1'];
@@ -21,7 +31,76 @@ export const FORBIDDEN_KEYS = [
 let state = null;
 const listeners = new Set();
 
+// ---------- server sync ----------
+let remote = false; // true when the Scala server answered /api/state
+let rev = null; // server revision of the state we hold
+let queue = Promise.resolve(); // actions are sent one at a time, in order
+let reportError = (msg) => console.warn(msg);
+
+/** Whether the Scala server owns the state (true) or this browser does (false). */
+export const isServerMode = () => remote;
+
+/** Where to show messages when the server rejects a change. Set by app.js. */
+export function onServerError(fn) {
+  reportError = fn;
+}
+
+function render() {
+  listeners.forEach((fn) => fn(state));
+}
+
+function adopt(body) {
+  if (body && body.state && body.state.version === VERSION) {
+    state = body.state;
+    rev = body.rev;
+    return true;
+  }
+  return false;
+}
+
+// The demo account that is acting (set by accounts.js). The server checks it against the action.
+let actor = 'talent';
+export function setActor(id) {
+  actor = id;
+}
+
+/** Sends one named action to the server. On success the server's state is adopted silently. */
+function send(action) {
+  if (!remote) return;
+  queue = queue.then(async () => {
+    try {
+      const res = await fetch('api/action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ ...action, account: actor }),
+      });
+      const body = await res.json().catch(() => null);
+      adopt(body);
+      if (!res.ok) {
+        reportError((body && body.error) || 'The server could not save that change.');
+        render();
+      }
+    } catch {
+      reportError('Lost the connection to the Skillink server. Your last change may not be saved. Is the server still running?');
+    }
+  });
+}
+
+/** Picks up changes made in another tab or role when this tab comes back into view. */
+async function refreshFromServer() {
+  if (!remote) return;
+  await queue;
+  try {
+    const res = await fetch('api/state', { headers: { Accept: 'application/json' }, cache: 'no-store' });
+    const body = await res.json();
+    if (res.ok && body.rev !== rev && adopt(body)) render();
+  } catch {
+    /* server stopped; keep what we have */
+  }
+}
+
 function persist() {
+  if (remote) return; // the server persists to data/state.json
   try {
     localStorage.setItem(KEY, JSON.stringify(state));
   } catch {
@@ -29,7 +108,23 @@ function persist() {
   }
 }
 
-export function load() {
+/** Loads state from the Scala server if one is running, otherwise from this browser. */
+export async function load() {
+  try {
+    const res = await fetch('api/state', { headers: { Accept: 'application/json' }, cache: 'no-store' });
+    if (res.ok && adopt(await res.json())) {
+      remote = true;
+      document.addEventListener('visibilitychange', () => document.visibilityState === 'visible' && refreshFromServer());
+      window.addEventListener('focus', refreshFromServer);
+      return state;
+    }
+  } catch {
+    /* no server: offline mode */
+  }
+  return loadLocal();
+}
+
+function loadLocal() {
   try {
     const raw = localStorage.getItem(KEY);
     if (raw) {
@@ -63,10 +158,12 @@ export function subscribe(fn) {
 
 function emit(opts = {}) {
   persist();
-  if (opts.render !== false) listeners.forEach((fn) => fn(state));
+  if (opts.render !== false) render();
 }
 
-export function update(mutator, opts) {
+// Local only. Views change state through the named functions below, never through update(),
+// so every change can be sent to the server as an action it validates.
+function update(mutator, opts) {
   mutator(state);
   emit(opts);
 }
@@ -74,6 +171,7 @@ export function update(mutator, opts) {
 export function resetDemo() {
   state = buildSeed();
   emit();
+  send({ type: 'reset' });
 }
 
 // ---------- lookups ----------
@@ -115,7 +213,7 @@ export function revealedTo(companyId, participantId) {
 
 export function pseudoLabel(participantId) {
   const p = participant(participantId);
-  return p ? `Solver #${p.pseudo}` : 'Solver (deleted)';
+  return p ? `Solver #${p.pseudo}` : tr({ en: 'Solver (deleted)', fi: 'Solver (poistettu)', sv: 'Solver (raderad)' });
 }
 
 // ---------- meetings ----------
@@ -143,35 +241,39 @@ export function existingMeeting(participantId, challengeId) {
 
 export function requestMeeting(participantId, challengeId, slotId, format) {
   if (activeRequestCount(participantId) >= REQUEST_CAP) {
-    return { ok: false, error: `You have used all ${REQUEST_CAP} meeting requests. Cancel one to request another.` };
+    return { ok: false, error: tr({ en: 'You have used all {n} meeting requests. Cancel one to request another.', fi: 'Olet käyttänyt kaikki {n} tapaamispyyntöä. Peru yksi pyytääksesi uutta.', sv: 'Du har använt alla {n} mötesförfrågningar. Avbryt en för att begära en ny.' }, { n: REQUEST_CAP }) };
   }
   if (existingMeeting(participantId, challengeId)) {
-    return { ok: false, error: 'You already have a conversation request open for this challenge.' };
+    return { ok: false, error: tr({ en: 'You already have a conversation request open for this challenge.', fi: 'Sinulla on jo avoin keskustelupyyntö tähän haasteeseen.', sv: 'Du har redan en öppen samtalsförfrågan för den här utmaningen.' }) };
   }
-  if (slotTaken(slotId)) return { ok: false, error: 'That time was just taken. Pick another time.' };
+  if (slotTaken(slotId)) return { ok: false, error: tr({ en: 'That time was just taken. Pick another time.', fi: 'Aika varattiin juuri. Valitse toinen aika.', sv: 'Tiden blev just bokad. Välj en annan tid.' }) };
   const ch = challenge(challengeId);
+  const id = uid('m');
   update((s) => {
     s.meetings.push({
-      id: uid('m'), challengeId, companyId: ch.companyId, participantId, slotId, format: format || 'open',
+      id, challengeId, companyId: ch.companyId, participantId, slotId, format: format || 'open',
       initiator: 'participant', partyStatus: 'requested', organizerStatus: 'pending', createdAt: nowIso(),
     });
     log('solver', 'requested meeting', `${pseudoLabel(participantId)} → ${company(ch.companyId).name}`);
   });
+  send({ type: 'requestMeeting', id, participantId, challengeId, slotId, format: format || 'open' });
   return { ok: true };
 }
 
 export function inviteParticipant(companyId, participantId, challengeId, slotId, format) {
   if (existingMeeting(participantId, challengeId)) {
-    return { ok: false, error: 'There is already an open conversation with this solver for this challenge.' };
+    return { ok: false, error: tr({ en: 'There is already an open conversation with this solver for this challenge.', fi: 'Tämän ratkaisijan kanssa on jo avoin keskustelu tästä haasteesta.', sv: 'Det finns redan ett öppet samtal med den här lösaren om den här utmaningen.' }) };
   }
-  if (slotTaken(slotId)) return { ok: false, error: 'That time is already booked. Pick another time.' };
+  if (slotTaken(slotId)) return { ok: false, error: tr({ en: 'That time is already booked. Pick another time.', fi: 'Aika on jo varattu. Valitse toinen aika.', sv: 'Tiden är redan bokad. Välj en annan tid.' }) };
+  const id = uid('m');
   update((s) => {
     s.meetings.push({
-      id: uid('m'), challengeId, companyId, participantId, slotId, format: format || 'open',
+      id, challengeId, companyId, participantId, slotId, format: format || 'open',
       initiator: 'host', partyStatus: 'invited', organizerStatus: 'pending', createdAt: nowIso(),
     });
     log('host', 'invited solver', `${company(companyId).name} → ${pseudoLabel(participantId)}`);
   });
+  send({ type: 'inviteParticipant', id, companyId, participantId, challengeId, slotId, format: format || 'open' });
   return { ok: true };
 }
 
@@ -185,6 +287,7 @@ export function respondToMeeting(meetingId, accept) {
     m.respondedAt = nowIso();
     log(actor, accept ? 'accepted meeting' : 'declined meeting', `${company(m.companyId).name} / ${pseudoLabel(m.participantId)}`);
   });
+  send({ type: 'respondToMeeting', meetingId, accept: !!accept });
 }
 
 export function cancelMeeting(meetingId) {
@@ -194,6 +297,7 @@ export function cancelMeeting(meetingId) {
     m.partyStatus = 'cancelled';
     log('solver', 'cancelled request', `${pseudoLabel(m.participantId)} → ${company(m.companyId).name}`);
   });
+  send({ type: 'cancelMeeting', meetingId });
 }
 
 export function organizerDecision(meetingId, approve) {
@@ -205,17 +309,18 @@ export function organizerDecision(meetingId, approve) {
     if (approve && isConfirmed(m) && !s.feedback[m.id]) s.feedback[m.id] = { participant: null, host: null };
     log('organizer', approve ? 'approved meeting' : 'declined meeting', `${company(m.companyId).name} / ${pseudoLabel(m.participantId)}`);
   });
+  send({ type: 'organizerDecision', meetingId, approve: !!approve });
 }
 
 /** One label used everywhere so a status reads the same in every role. */
 export function meetingStatus(m) {
-  if (m.partyStatus === 'cancelled') return { key: 'cancelled', label: 'Cancelled', tone: 'muted' };
-  if (m.partyStatus === 'declined') return { key: 'declined', label: 'Declined', tone: 'danger' };
-  if (m.organizerStatus === 'declined') return { key: 'org-declined', label: 'Declined by organizer', tone: 'danger' };
-  if (m.partyStatus === 'requested') return { key: 'requested', label: 'Waiting for host', tone: 'wait' };
-  if (m.partyStatus === 'invited') return { key: 'invited', label: 'Waiting for solver', tone: 'wait' };
-  if (m.organizerStatus === 'pending') return { key: 'mutual', label: 'Mutual, awaiting organizer', tone: 'info' };
-  return { key: 'confirmed', label: 'Confirmed', tone: 'ok' };
+  if (m.partyStatus === 'cancelled') return { key: 'cancelled', label: tr({ en: 'Cancelled', fi: 'Peruttu', sv: 'Avbruten' }), tone: 'muted' };
+  if (m.partyStatus === 'declined') return { key: 'declined', label: tr({ en: 'Declined', fi: 'Hylätty', sv: 'Avböjd' }), tone: 'danger' };
+  if (m.organizerStatus === 'declined') return { key: 'org-declined', label: tr({ en: 'Declined by organizer', fi: 'Järjestäjä hylkäsi', sv: 'Avböjd av arrangören' }), tone: 'danger' };
+  if (m.partyStatus === 'requested') return { key: 'requested', label: tr({ en: 'Waiting for host', fi: 'Odottaa yritystä', sv: 'Väntar på värden' }), tone: 'wait' };
+  if (m.partyStatus === 'invited') return { key: 'invited', label: tr({ en: 'Waiting for solver', fi: 'Odottaa ratkaisijaa', sv: 'Väntar på lösaren' }), tone: 'wait' };
+  if (m.organizerStatus === 'pending') return { key: 'mutual', label: tr({ en: 'Mutual, awaiting organizer', fi: 'Molemmat kyllä, odottaa järjestäjää', sv: 'Ömsesidigt, väntar på arrangören' }), tone: 'info' };
+  return { key: 'confirmed', label: tr({ en: 'Confirmed', fi: 'Vahvistettu', sv: 'Bekräftad' }), tone: 'ok' };
 }
 
 // ---------- participant workspace ----------
@@ -226,6 +331,7 @@ export function toggleBookmark(participantId, challengeId) {
     if (i >= 0) list.splice(i, 1);
     else list.push(challengeId);
   });
+  send({ type: 'toggleBookmark', participantId, challengeId });
 }
 
 export function findSubmission(participantId, challengeId) {
@@ -234,14 +340,16 @@ export function findSubmission(participantId, challengeId) {
 
 export function saveSubmission(participantId, challengeId, data, submit, opts) {
   let result = { ok: true };
+  let id = null;
   update((s) => {
     let sub = s.submissions.find((x) => x.participantId === participantId && x.challengeId === challengeId);
     if (!sub) {
       sub = { id: uid('s'), challengeId, participantId, status: 'draft', translations: {} };
       s.submissions.push(sub);
     }
+    id = sub.id;
     if (sub.status === 'submitted' && !submit) {
-      result = { ok: false, error: 'This approach is already shared. Withdraw it first to edit it.' };
+      result = { ok: false, error: tr({ en: 'This approach is already shared. Withdraw it first to edit it.', fi: 'Tämä ajattelu on jo jaettu. Peru jako ensin muokataksesi sitä.', sv: 'Det här är redan delat. Dra tillbaka det först för att redigera.' }) };
       return;
     }
     Object.assign(sub, {
@@ -260,6 +368,7 @@ export function saveSubmission(participantId, challengeId, data, submit, opts) {
       log('solver', 'shared approach', `${pseudoLabel(participantId)} → ${challenge(challengeId).title}`);
     }
   }, opts);
+  if (result.ok) send({ type: 'saveSubmission', id, participantId, challengeId, data, submit: !!submit });
   return result;
 }
 
@@ -271,37 +380,58 @@ export function withdrawSubmission(submissionId) {
       delete sub.submittedAt;
     }
   });
+  send({ type: 'withdrawSubmission', submissionId });
 }
 
 export function deleteDraft(submissionId) {
   update((s) => {
     s.submissions = s.submissions.filter((x) => !(x.id === submissionId && x.status === 'draft'));
   });
+  send({ type: 'deleteDraft', submissionId });
 }
 
 export function createParticipant() {
+  let n;
+  do n = String(1000 + Math.floor(Math.random() * 8999));
+  while (participant(`p-${n}`));
   update((s) => {
-    const n = String(1000 + Math.floor(Math.random() * 8999));
     const p = { id: `p-${n}`, pseudo: `ESP-${n}`, name: 'New demo solver', email: `solver.${n}@example.com` };
     s.participants.push(p);
     s.currentParticipantId = p.id;
   });
+  send({ type: 'createParticipant', n });
+}
+
+/** Which demo solver the Talent side acts as, e.g. to see an invitation from the solver's side. */
+export function setCurrentParticipant(participantId, opts) {
+  if (!participant(participantId)) return;
+  update((s) => (s.currentParticipantId = participantId), opts);
+  send({ type: 'selectParticipant', participantId });
 }
 
 // ---------- companies ----------
+/** Which host the Employer side acts as. */
+export function setCurrentCompany(companyId, opts) {
+  update((s) => (s.currentCompanyId = companyId), opts);
+  send({ type: 'selectCompany', companyId });
+}
+
 export function addChallenge(data) {
   const id = uid('ch');
   update((s) => {
     s.challenges.push({ id, createdAt: nowIso(), ...data });
     log('host', 'published challenge', `${company(data.companyId).name}: ${data.title}`);
   });
+  send({ type: 'addChallenge', id, data });
   return id;
 }
 
 export function requestCoWriting(companyId, note) {
+  const id = uid('cw');
   update((s) => {
-    s.coWriteRequests.push({ id: uid('cw'), companyId, note, at: nowIso(), status: 'queued' });
+    s.coWriteRequests.push({ id, companyId, note, at: nowIso(), status: 'queued' });
   });
+  send({ type: 'requestCoWriting', id, companyId, note });
 }
 
 // ---------- post-event mutual opt-in ----------
@@ -310,6 +440,13 @@ export function setFeedback(meetingId, side, choice) {
     const f = s.feedback[meetingId] || (s.feedback[meetingId] = { participant: null, host: null });
     f[side] = choice;
   });
+  send({ type: 'setFeedback', meetingId, side, choice });
+}
+
+/** Organizer simulator: clear every post-event choice. */
+export function clearAllFeedback() {
+  update((s) => Object.keys(s.feedback).forEach((k) => (s.feedback[k] = { participant: null, host: null })));
+  send({ type: 'clearFeedback' });
 }
 
 export function feedbackOutcome(meetingId) {
@@ -320,12 +457,12 @@ export function feedbackOutcome(meetingId) {
 
 // ---------- aggregates (anonymous, no individual profiling) ----------
 const THEMES = [
-  { id: 'data', label: 'Data and measurement', words: ['data', 'metric', 'measure', 'log', 'kpi', 'forecast', 'how many', 'how much', 'mitta', 'mätdata', 'hur många'] },
-  { id: 'people', label: 'Users, customers and residents', words: ['user', 'customer', 'resident', 'passenger', 'pedestrian', 'asiakas', 'käyttäjä', 'asukas', 'kund', 'användare', 'invånare'] },
-  { id: 'ownership', label: 'Ownership and decision-making', words: ['who ', 'owns', 'owner', 'decide', 'approv', 'legal', 'kuka', 'päättää', 'vem', 'äger'] },
-  { id: 'risk', label: 'Constraints, cost and safety', words: ['cost', 'budget', 'warranty', 'safety', 'risk', 'penalis', 'contract', 'worse', 'kustann', 'riski', 'säkerhet'] },
-  { id: 'access', label: 'Getting hands-on access', words: ['can i', 'visit', 'ride', 'read', 'remote access', 'on site', 'voinko', 'paikan päällä'] },
-  { id: 'success', label: 'Goals and what success means', words: ['success', 'goal', 'matters more', 'consider', 'onnistu', 'tavoite', 'mål', 'actually used'] },
+  { id: 'data', get label() { return tr({ en: 'Data and measurement', fi: 'Data ja mittaaminen', sv: 'Data och mätning' }); }, words: ['data', 'metric', 'measure', 'log', 'kpi', 'forecast', 'how many', 'how much', 'mitta', 'mätdata', 'hur många'] },
+  { id: 'people', get label() { return tr({ en: 'Users, customers and residents', fi: 'Käyttäjät, asiakkaat ja asukkaat', sv: 'Användare, kunder och invånare' }); }, words: ['user', 'customer', 'resident', 'passenger', 'pedestrian', 'asiakas', 'käyttäjä', 'asukas', 'kund', 'användare', 'invånare'] },
+  { id: 'ownership', get label() { return tr({ en: 'Ownership and decision-making', fi: 'Omistajuus ja päätöksenteko', sv: 'Ägarskap och beslutsfattande' }); }, words: ['who ', 'owns', 'owner', 'decide', 'approv', 'legal', 'kuka', 'päättää', 'vem', 'äger'] },
+  { id: 'risk', get label() { return tr({ en: 'Constraints, cost and safety', fi: 'Rajoitteet, kustannukset ja turvallisuus', sv: 'Begränsningar, kostnad och säkerhet' }); }, words: ['cost', 'budget', 'warranty', 'safety', 'risk', 'penalis', 'contract', 'worse', 'kustann', 'riski', 'säkerhet'] },
+  { id: 'access', get label() { return tr({ en: 'Getting hands-on access', fi: 'Pääsy käytännön tekemiseen', sv: 'Praktisk tillgång' }); }, words: ['can i', 'visit', 'ride', 'read', 'remote access', 'on site', 'voinko', 'paikan päällä'] },
+  { id: 'success', get label() { return tr({ en: 'Goals and what success means', fi: 'Tavoitteet ja onnistumisen mittarit', sv: 'Mål och vad framgång innebär' }); }, words: ['success', 'goal', 'matters more', 'consider', 'onnistu', 'tavoite', 'mål', 'actually used'] },
 ];
 
 function questionText(sub) {
@@ -345,7 +482,8 @@ export function themeCounts(subs) {
   return { counts, questions };
 }
 
-export const THEME_LABELS = Object.fromEntries(THEMES.map((t) => [t.id, t.label]));
+// Read on every access, so the labels follow the interface language.
+export const THEME_LABELS = new Proxy({}, { get: (_, id) => THEMES.find((t) => t.id === id)?.label });
 
 function emptyPersonAggregates() {
   return {
@@ -474,6 +612,7 @@ export function purgePersonalData() {
     s.purge.at = nowIso();
     s.purge.ledger = { before, after: personalDataInventory(s) };
   });
+  send({ type: 'purgePersonalData' });
 }
 
 /** Consent withdrawal: erase one participant's data now, keeping anonymous counts. */
@@ -494,6 +633,7 @@ export function deleteParticipantData(participantId) {
     delete s.consents[participantId];
     if (s.currentParticipantId === participantId) s.currentParticipantId = null;
   });
+  send({ type: 'deleteParticipantData', participantId });
 }
 
 // ---------- compliance audit ----------

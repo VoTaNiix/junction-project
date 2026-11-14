@@ -2,10 +2,63 @@
   "version": "0.0.1",
   "configurations": [
     {
+      "name": "skillink-scala",
+      "runtimeExecutable": "java",
+      "runtimeArgs": [
+        "-Dsbt.log.noformat=true",
+        "-Dsbt.server.forcestart=false",
+        "-jar",
+        "C:/Users/micha/AppData/Local/Temp/claude/e4eea8d50e8ed9d3/0d122d89-ec44-4536-9650-659e3eec12d3/scratchpad/sbt-dl/sbt/bin/sbt-launch.jar",
+        "run"
+      ],
+      "port": 8080,
+      "autoPort": false
+    },
+    {
       "name": "skillink",
       "runtimeExecutable": "py",
-      "runtimeArgs": ["-m", "http.server", "5173"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "5173"
+      ],
       "port": 5173
+    },
+    {
+      "name": "skillink-scala-blue",
+      "runtimeExecutable": "java",
+      "runtimeArgs": [
+        "-Dskillink.webroot=X:/Claude/Junction_Project_Blue",
+        "-cp",
+        "X:\\Claude\\Junction_Project_Blue\\target\\scala-2.13\\classes;C:\\Users\\micha\\AppData\\Local\\Coursier\\Cache\\v1\\https\\repo1.maven.org\\maven2\\org\\scala-lang\\scala-library\\2.13.18\\scala-library-2.13.18.jar;C:\\Users\\micha\\AppData\\Local\\Coursier\\Cache\\v1\\https\\repo1.maven.org\\maven2\\com\\lihaoyi\\ujson_2.13\\4.4.3\\ujson_2.13-4.4.3.jar;C:\\Users\\micha\\AppData\\Local\\Coursier\\Cache\\v1\\https\\repo1.maven.org\\maven2\\com\\lihaoyi\\upickle-core_2.13\\4.4.3\\upickle-core_2.13-4.4.3.jar;C:\\Users\\micha\\AppData\\Local\\Coursier\\Cache\\v1\\https\\repo1.maven.org\\maven2\\com\\lihaoyi\\geny_2.13\\1.1.1\\geny_2.13-1.1.1.jar",
+        "skillink.SkillinkServer"
+      ],
+      "port": 8081,
+      "autoPort": false
+    },
+    {
+      "name": "skillink-blue",
+      "runtimeExecutable": "py",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "5180",
+        "--directory",
+        "X:/Claude/Junction_Project_Blue"
+      ],
+      "port": 5180
+    },
+    {
+      "name": "skillink-final",
+      "runtimeExecutable": "java",
+      "runtimeArgs": [
+        "-Dskillink.webroot=X:/Claude/Junction_Project_Final",
+        "-cp",
+        "X:/Claude/Junction_Project_Final/src/main/resources;X:\\Claude\\Junction_Project_Final\\target\\scala-2.13\\classes;C:\\Users\\micha\\AppData\\Local\\Coursier\\Cache\\v1\\https\\repo1.maven.org\\maven2\\org\\scala-lang\\scala-library\\2.13.18\\scala-library-2.13.18.jar;C:\\Users\\micha\\AppData\\Local\\Coursier\\Cache\\v1\\https\\repo1.maven.org\\maven2\\com\\lihaoyi\\ujson_2.13\\4.4.3\\ujson_2.13-4.4.3.jar;C:\\Users\\micha\\AppData\\Local\\Coursier\\Cache\\v1\\https\\repo1.maven.org\\maven2\\com\\lihaoyi\\upickle-core_2.13\\4.4.3\\upickle-core_2.13-4.4.3.jar;C:\\Users\\micha\\AppData\\Local\\Coursier\\Cache\\v1\\https\\repo1.maven.org\\maven2\\com\\lihaoyi\\geny_2.13\\1.1.1\\geny_2.13-1.1.1.jar",
+        "skillink.SkillinkServer"
+      ],
+      "port": 8081,
+      "autoPort": false
     }
   ]
 }
