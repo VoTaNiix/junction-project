@@ -1,0 +1,379 @@
+<title>Skillink Pitch Playbook</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@600;800&family=Atkinson+Hyperlegible+Next:wght@400;700&display=swap">
+<style>
+/* Layout: one reading column with a sticky section nav; the rehearsal timer sits at the top as the working tool. */
+:root {
+  --bg: #f7f6f2;
+  --surface: #ffffff;
+  --quiet: #efede6;
+  --line: #dcd7c9;
+  --ink: #111827;
+  --ink-2: #444b59;
+  --brand: #003580;
+  --link: #0050c8;
+  --brand-soft: #e3ecfa;
+  --ok: #1b5e20;
+  --ok-soft: #e3f0e3;
+  --warn: #7a4f00;
+  --warn-soft: #fdf1d6;
+  --bad: #a8231a;
+  --display: 'Schibsted Grotesk', 'Segoe UI', system-ui, sans-serif;
+  --text: 'Atkinson Hyperlegible Next', 'Segoe UI', system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1626; --surface: #152038; --quiet: #1b2843; --line: #2c3b5c; --ink: #eef1f7; --ink-2: #b9c2d4;
+    --brand: #a9c3f0; --link: #8db2f5; --brand-soft: #1e3360; --ok: #8fd19a; --ok-soft: #173322;
+    --warn: #f2c66d; --warn-soft: #3a2f14; --bad: #ff8f85; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1626; --surface: #152038; --quiet: #1b2843; --line: #2c3b5c; --ink: #eef1f7; --ink-2: #b9c2d4;
+  --brand: #a9c3f0; --link: #8db2f5; --brand-soft: #1e3360; --ok: #8fd19a; --ok-soft: #173322;
+  --warn: #f2c66d; --warn-soft: #3a2f14; --bad: #ff8f85; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--text); font-size: 17px; line-height: 1.6; }
+.wrap { max-width: 980px; margin: 0 auto; padding-block: 40px 96px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 56px; }
+h1, h2, h3 { font-family: var(--display); color: var(--brand); margin: 0; text-wrap: balance; letter-spacing: -0.02em; }
+h1 { font-size: clamp(38px, 6vw, 60px); font-weight: 800; line-height: 1.02; letter-spacing: -0.035em; }
+h2 { font-size: clamp(26px, 3.6vw, 34px); font-weight: 800; line-height: 1.1; }
+h3 { font-size: 20px; font-weight: 600; line-height: 1.25; }
+p { margin: 0; }
+a { color: var(--link); }
+a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible { outline: 3px solid var(--link); outline-offset: 2px; border-radius: 4px; }
+.muted { color: var(--ink-2); }
+.small { font-size: 15px; }
+section { display: flex; flex-direction: column; gap: 20px; }
+.lede { font-size: 20px; color: var(--ink-2); max-width: 64ch; }
+
+header.top { display: flex; flex-direction: column; gap: 18px; }
+.kicker { font-weight: 700; color: var(--link); }
+.btnrow { display: flex; flex-wrap: wrap; gap: 12px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 10px 18px; border-radius: 10px; font: 700 16px var(--text); text-decoration: none; border: 2px solid var(--brand); cursor: pointer; }
+.btn.primary { background: var(--brand); color: var(--bg); }
+.btn.ghost { background: transparent; color: var(--brand); }
+
+nav.toc { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); padding-block: 10px; display: flex; gap: 6px 18px; flex-wrap: wrap; font-size: 15px; font-weight: 700; }
+nav.toc a { text-decoration: none; color: var(--ink-2); }
+nav.toc a:hover { color: var(--link); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+
+/* Timer */
+.timer { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 24px; display: grid; grid-template-columns: auto 1fr; gap: 20px 32px; align-items: center; }
+.clock { font-family: var(--display); font-size: clamp(56px, 10vw, 84px); font-weight: 800; color: var(--brand); font-variant-numeric: tabular-nums; line-height: 1; }
+.clock.over { color: var(--bad); }
+.now { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.now .label { font-size: 14px; font-weight: 700; color: var(--ink-2); }
+.now .slide { font-family: var(--display); font-size: 24px; font-weight: 600; color: var(--ink); }
+.now .say { color: var(--ink-2); }
+.timer .controls { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.seg { display: inline-flex; border: 2px solid var(--brand); border-radius: 10px; overflow: hidden; }
+.seg button { background: transparent; color: var(--brand); border: 0; padding: 8px 14px; font: 700 15px var(--text); cursor: pointer; min-height: 40px; }
+.seg button[aria-pressed="true"] { background: var(--brand); color: var(--bg); }
+.bar { grid-column: 1 / -1; display: flex; height: 10px; border-radius: 6px; overflow: hidden; background: var(--quiet); }
+.bar span { height: 100%; border-right: 2px solid var(--surface); background: var(--brand-soft); }
+.bar span.done { background: var(--brand); }
+.bar span.cur { background: var(--link); }
+@media (max-width: 640px) { .timer { grid-template-columns: 1fr; } }
+
+/* Tips map */
+.tips { display: grid; grid-template-columns: 1fr; gap: 14px; }
+@media (min-width: 700px) { .tips { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(5, auto); grid-auto-flow: column; } }
+.tip { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 6px; }
+.tip .tag { font-size: 13px; font-weight: 700; align-self: flex-start; padding: 2px 10px; border-radius: 999px; }
+.tag.do { background: var(--ok-soft); color: var(--ok); }
+.tag.dont { background: var(--warn-soft); color: var(--warn); }
+
+/* Checklist */
+.check { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+.check li { border-bottom: 1px solid var(--line); }
+.check label { display: flex; gap: 14px; align-items: flex-start; padding: 12px 4px; cursor: pointer; }
+.check input { width: 22px; height: 22px; margin-top: 2px; flex: 0 0 auto; accent-color: var(--brand); }
+.check input:checked + span { color: var(--ink-2); text-decoration: line-through; text-decoration-color: var(--line); }
+.when { font-family: var(--display); font-weight: 600; color: var(--brand); margin-top: 8px; }
+
+/* Run of show */
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 680px; font-size: 16px; }
+th, td { text-align: left; vertical-align: top; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+th { font-size: 14px; color: var(--ink-2); background: var(--quiet); }
+tr:last-child td { border-bottom: 0; }
+td.t { font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 700; color: var(--brand); }
+td.s { white-space: nowrap; font-weight: 700; }
+tr.demo td { background: var(--brand-soft); }
+.say { font-style: italic; }
+
+/* Demo steps */
+.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; counter-reset: st; }
+.steps > li { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; display: grid; grid-template-columns: 44px 1fr; gap: 4px 14px; }
+.steps > li::before { counter-increment: st; content: counter(st); grid-row: span 3; font-family: var(--display); font-weight: 800; font-size: 28px; color: var(--link); line-height: 1.1; }
+.steps .side { font-size: 14px; font-weight: 700; color: var(--ink-2); }
+.steps .click { margin: 0; padding-left: 20px; }
+.steps .line { border-left: 3px solid var(--link); padding-left: 12px; font-style: italic; color: var(--ink); }
+kbd, .ui { font-family: var(--text); font-weight: 700; background: var(--quiet); border: 1px solid var(--line); border-radius: 6px; padding: 0 6px; font-size: 0.92em; white-space: nowrap; }
+
+.callout { background: var(--warn-soft); color: var(--ink); border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 8px; }
+.callout h3 { color: var(--warn); }
+
+/* Q&A */
+details { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+details + details { margin-top: 10px; }
+summary { cursor: pointer; padding: 14px 18px; font-weight: 700; list-style-position: outside; }
+details > div { padding: 0 18px 16px; color: var(--ink-2); display: flex; flex-direction: column; gap: 8px; }
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+.card ul, .card ol { margin: 0; padding-left: 20px; }
+footer { font-size: 15px; color: var(--ink-2); border-top: 1px solid var(--line); padding-top: 18px; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+
+<div class="wrap">
+<header class="top">
+  <p class="kicker">Junction 2026 · Skillink</p>
+  <h1>Pitch playbook</h1>
+  <p class="lede">A two-minute pitch with a 50-second live demo. Everything the team needs on the day: the timed script, the exact demo clicks, a fallback, and answers to the questions judges are likely to ask. Built on Junction's own pitching advice.</p>
+  <div class="btnrow">
+    <a class="btn primary" href="https://claude.ai/artifact/FQEW5UzTX6ncDP9do6nd67" target="_blank" rel="noopener">Open the slide deck</a>
+    <a class="btn ghost" href="https://hackjunction.medium.com/how-to-pitch-your-idea-at-a-hackathon-a95cd3f62f60" target="_blank" rel="noopener">Junction's pitching tips</a>
+  </div>
+  <p class="small muted">Demo app: <span class="ui">http://localhost:8081</span>, started from IntelliJ with the Skillink server run configuration (or <span class="ui">sbt run</span>) in the Junction_Project_Final folder.</p>
+</header>
+
+<nav class="toc" aria-label="Sections">
+  <a href="#timer">Timer</a><a href="#tips">Junction's tips</a><a href="#before">Before you go on</a><a href="#show">Run of show</a><a href="#demo">Demo script</a><a href="#fallback">If it breaks</a><a href="#qa">Q&amp;A</a><a href="#backups">Backup slides</a><a href="#rehearse">Rehearsal</a>
+</nav>
+
+<section id="timer" aria-labelledby="timer-h">
+  <h2 id="timer-h">Rehearsal timer</h2>
+  <p class="muted">Start it with your first word. It shows which slide you should be on and the line to land. The clock turns red after 2:00.</p>
+  <div class="timer">
+    <div class="clock" id="clock" aria-live="off">0:00</div>
+    <div class="now" aria-live="polite">
+      <span class="label" id="now-label">Slide 1 of the deck</span>
+      <span class="slide" id="now-slide">Cover</span>
+      <span class="say" id="now-say">Press Start.</span>
+    </div>
+    <div class="bar" id="bar" aria-hidden="true"></div>
+    <div class="controls">
+      <button class="btn primary" id="start" type="button">Start</button>
+      <button class="btn ghost" id="reset" type="button">Reset</button>
+    </div>
+  </div>
+</section>
+
+<section id="tips" aria-labelledby="tips-h">
+  <h2 id="tips-h">How the pitch follows Junction's advice</h2>
+  <p class="muted">Junction lists five dos and five don'ts. Here is where each one shows up in our pitch.</p>
+  <div class="tips">
+    <div class="tip"><span class="tag do">Do</span><h3>Start with a story</h3><p>After a 5-second team intro, we open with Sam, a real persona from the demo. The same Sam closes the pitch.</p></div>
+    <div class="tip"><span class="tag do">Do</span><h3>Be user-centric</h3><p>The problem is told from both sides of the table, and the demo shows what the solver, the host and the event team each see.</p></div>
+    <div class="tip"><span class="tag do">Do</span><h3>Show a prototype</h3><p>A 50-second live demo of working code, following one conversation from the solver to the host to the event team. Almost half the pitch.</p></div>
+    <div class="tip"><span class="tag do">Do</span><h3>Introduce the team</h3><p>Names on the first and last slides, said in one line at the start. There's no time for a team slide, so let the demo show what you can do.</p></div>
+    <div class="tip"><span class="tag do">Do</span><h3>Practice</h3><p>Use the timer above. Rehearse at least three times, once in front of someone outside the team.</p></div>
+    <div class="tip"><span class="tag dont">Don't</span><h3>Overload on jargon</h3><p>Say "anonymous until both agree", not "pseudonymity". Say "skills list" before you say "ESCO". No stack talk unless asked.</p></div>
+    <div class="tip"><span class="tag dont">Don't</span><h3>Oversell</h3><p>40% is a pilot target, not a result. The data is made up. Say "designed with the EU AI Act in mind", never "compliant".</p></div>
+    <div class="tip"><span class="tag dont">Don't</span><h3>Run long</h3><p>Six slides, two minutes, one idea per slide. Everything else moved to backup slides for questions. Stop talking at the closing line.</p></div>
+    <div class="tip"><span class="tag dont">Don't</span><h3>Dodge questions</h3><p>The Q&amp;A section below has short answers to the likely questions, including the uncomfortable ones.</p></div>
+    <div class="tip"><span class="tag dont">Don't</span><h3>Ignore feedback</h3><p>Two feedback rounds already shaped the product (fewer sections, a simpler footer). Mention it if asked how you iterated.</p></div>
+  </div>
+</section>
+
+<section id="before" aria-labelledby="before-h">
+  <h2 id="before-h">Before you go on stage</h2>
+  <p class="muted">Ticks are saved in this browser only.</p>
+  <p class="when">The night before</p>
+  <ul class="check" data-group="night">
+    <li><label><input type="checkbox" id="c1"><span>Fill in the team name and your names at the bottom of the cover and closing slides.</span></label></li>
+    <li><label><input type="checkbox" id="c2"><span>Agree who speaks which part: one storyteller, one demo driver. The driver never talks and clicks at the same time on a hard step.</span></label></li>
+    <li><label><input type="checkbox" id="c3"><span>Run the full pitch three times with the timer, once in front of someone outside the team.</span></label></li>
+    <li><label><input type="checkbox" id="c4"><span>Read the Q&amp;A answers out loud once each.</span></label></li>
+  </ul>
+  <p class="when">15 minutes before</p>
+  <ul class="check" data-group="before">
+    <li><label><input type="checkbox" id="c5"><span>Start the Skillink server in IntelliJ and open <span class="ui">http://localhost:8081</span>. The console should say it is running on port 8081.</span></label></li>
+    <li><label><input type="checkbox" id="c6"><span>Click <span class="ui">Reset demo data</span> and confirm. Every demo step is written for the original data.</span></label></li>
+    <li><label><input type="checkbox" id="c7"><span>Set the language menu to <span class="ui">English</span> and zoom the browser to 125% so the back row can read it.</span></label></li>
+    <li><label><input type="checkbox" id="c11"><span>Get the demo ready: <span class="ui">Talent</span>, <span class="ui">My workspace</span>, <span class="ui">Continue draft</span> on the Lumivirta Energy challenge, type one line under question 2, and leave the editor open. The draft saves itself. This saves 15 seconds on stage.</span></label></li>
+    <li><label><input type="checkbox" id="c8"><span>Close other tabs, turn off notifications and the screen saver. Plug in the charger.</span></label></li>
+    <li><label><input type="checkbox" id="c9"><span>Open the deck in presenting mode. Practice switching between the deck and the browser once (Alt+Tab).</span></label></li>
+    <li><label><input type="checkbox" id="c10"><span>The demo does not need the internet. If the venue Wi-Fi is bad, stay offline.</span></label></li>
+  </ul>
+</section>
+
+<section id="show" aria-labelledby="show-h">
+  <h2 id="show-h">Run of show</h2>
+  <p class="muted">Two minutes, six slides. The full speaker notes are in the deck under each slide.</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Time</th><th>Slide</th><th>Goal</th><th>The line to land</th></tr></thead>
+    <tbody id="show-rows"></tbody>
+  </table>
+  </div>
+</section>
+
+<section id="demo" aria-labelledby="demo-h">
+  <h2 id="demo-h">Live demo script</h2>
+  <p class="muted">50 seconds, from 0:40 to 1:30. One conversation seen from three sides. We ran these exact clicks on the final version after a reset, and every step worked. Start with the editor already open and question 2 filled in (see the checklist).</p>
+  <ol class="steps">
+    <li>
+      <span class="side">Talent · 0:40–0:50</span>
+      <ul class="click">
+        <li>Tick the consent box, click <span class="ui">Share with Lumivirta Energy</span>.</li>
+        <li>In the message at the bottom, click <span class="ui">See it as Lumivirta Energy</span>.</li>
+      </ul>
+      <p class="line">"No CV, no photo. Three short answers. Now let's switch sides."</p>
+    </li>
+    <li>
+      <span class="side">Employer · 0:50–1:05</span>
+      <ul class="click">
+        <li>On the <span class="ui">Review dashboard</span>, click <span class="ui">EU-Hosted Machine Translation (Simulated)</span> under the Finnish answer from <span class="ui">Solver #ESP-2093</span>.</li>
+      </ul>
+      <p class="line">"No names, no scores, oldest first. The translation sits next to the Finnish, never in its place."</p>
+    </li>
+    <li>
+      <span class="side">Employer · 1:05–1:15</span>
+      <ul class="click">
+        <li>Open <span class="ui">Conversations</span> and click <span class="ui">Accept</span>.</li>
+      </ul>
+      <p class="line">"Only now does Sam's name appear."</p>
+    </li>
+    <li>
+      <span class="side">Event team · 1:15–1:30</span>
+      <ul class="click">
+        <li>Click <span class="ui">Event team</span> in the header.</li>
+        <li>Click <span class="ui">Approve</span> on <b>Lumivirta Energy and Solver #ESP-4821</b>. It is the third card, so don't click the first one by habit.</li>
+        <li>Open <span class="ui">Schedule and export</span> and point at the three download buttons. Don't click them.</li>
+      </ul>
+      <p class="line">"A person confirms every meeting, and it goes straight to Brella, Tavata or your calendar."</p>
+    </li>
+  </ol>
+</section>
+
+<section id="fallback" aria-labelledby="fallback-h">
+  <div class="callout">
+    <h3 id="fallback-h">If the demo breaks</h3>
+    <p>Don't debug on stage. Say "Let me show you what you would have seen" and jump to slide 7, the backup with three screenshots, right after the closing slide. Walk through it in 20 seconds with the same lines, then go back to slide 5, "Fair by design".</p>
+    <p>If something only looks wrong (a step already done, a different card on top), the data was not reset. Keep talking over it, or click <span class="ui">Reset demo data</span> once and carry on. Reset takes two clicks.</p>
+  </div>
+</section>
+
+<section id="qa" aria-labelledby="qa-h">
+  <h2 id="qa-h">Q&amp;A prep</h2>
+  <p class="muted">Short answers first, details only if they ask a follow-up. If you don't know, say so and say what you would do to find out.</p>
+  <div>
+    <details><summary>Can't people just use AI to write their answers too?</summary><div><p>They can, but it helps less. The answers are about one specific problem, and the third question is what you would ask the host. Generic polish doesn't help there. More importantly, the answer is not the decision: it only gets you into a real conversation, and you can't outsource that.</p></div></details>
+    <details><summary>How is this different from Brella or LinkedIn?</summary><div><p>Brella and Tavata arrange the meetings; we decide who should meet and why, then export to them. LinkedIn is built around profiles and CVs, which is exactly what we leave out until both sides agree to meet.</p></div></details>
+    <details><summary>Why don't you use AI to match people? Wouldn't that scale better?</summary><div><p>AI in hiring counts as high-risk under the EU AI Act, and automated scoring tends to reward polish and pedigree. We chose to keep people deciding. The five-request limit per person keeps the volume readable, and answers are short.</p></div></details>
+    <details><summary>What stops a company from getting flooded?</summary><div><p>Each solver can send at most five conversation requests, and the event team approves every meeting. Answers are three short questions, and bullet points are fine, so reading them is quick.</p></div></details>
+    <details><summary>Who pays for this?</summary><div><p>Be honest that it's not validated. The natural buyer is the event organizer, here the City of Espoo and Business Espoo, as part of running an event. A pilot would tell us whether companies would also pay per challenge. Don't name a price you haven't tested.</p></div></details>
+    <details><summary>What about privacy and GDPR?</summary><div><p>Consent is for one purpose, arranging conversations at this event. Hosts see a solver ID, not a name. Data is deleted 30 days after the event, or straight away when someone withdraws consent. We never ask for age, gender, nationality, photo or school.</p></div></details>
+    <details><summary>Does it work for non-tech companies?</summary><div><p>Yes. The demo already includes public-sector services, construction and manufacturing. Any company with a real problem can describe it, and the 10-minute template walks them through it.</p></div></details>
+    <details><summary>What did you actually build, and what is mocked?</summary><div><p>The app is real: a Scala server holds the state and every rule, and the frontend is plain HTML, CSS and JavaScript in three languages. The data is made up, and the machine translation is simulated and labelled that way in the app.</p></div></details>
+    <details><summary>How would you know it works?</summary><div><p>One number: the share of conversations where both sides choose to keep talking afterwards. Our pilot target is 40%. After the event, each side privately picks "Let's continue" or "Not now", and contact details are shared only when both say continue.</p></div></details>
+    <details><summary>What would you do next with more time?</summary><div><p>Run it at one real Espoo event with a handful of hosts, connect the live ESCO skills list, add sign-in, and test accessibility with real users.</p></div></details>
+  </div>
+</section>
+
+<section id="backups" aria-labelledby="backups-h">
+  <h2 id="backups-h">Backup slides for questions</h2>
+  <p class="muted">What didn't fit in two minutes sits after the closing slide. Jump to one only when a question calls for it, by typing its number and pressing Enter.</p>
+  <div class="cols">
+    <div class="card"><h3>7 · Demo screenshots</h3><p>Only if the live demo fails.</p></div>
+    <div class="card"><h3>8 · 40% pilot target</h3><p>For "How would you know it works?"</p></div>
+    <div class="card"><h3>9 · Four collaboration formats</h3><p>For "Is this only for hiring?"</p></div>
+    <div class="card"><h3>10 · Where we are</h3><p>For "What did you actually build?" and "What's next?"</p></div>
+  </div>
+</section>
+
+<section id="rehearse" aria-labelledby="rehearse-h">
+  <h2 id="rehearse-h">Rehearsal plan</h2>
+  <div class="cols">
+    <div class="card"><h3>Round 1: timing</h3><p>Run it with the timer. Two minutes is tight: cut words wherever you go over, never the demo or the closing line. Aim for 1:50 to leave a buffer.</p></div>
+    <div class="card"><h3>Round 2: an outsider</h3><p>Pitch to someone outside the team. Ask them to retell the idea in one sentence. If they can't, fix the slide where they got lost.</p></div>
+    <div class="card"><h3>Round 3: the real thing</h3><p>Full run with the projector or a big screen, the clicker, and a reset before you start. Then two minutes of mock questions.</p></div>
+  </div>
+</section>
+
+<footer>Skillink, pre-event matchmaking for City of Espoo and Business Espoo events. All demo people and companies are made up.</footer>
+</div>
+
+<script>
+(() => {
+  const FULL = [
+    [0, 'Cover', 1, 'Team, in one line', '"We\'re [team]: [names]. We built Skillink."'],
+    [5, 'Meet Sam', 2, 'Story and problem', '"Nobody ever talked about the actual problem."'],
+    [25, 'How it works', 3, 'The idea', '"The third question is: what would you ask us? Let me show you."'],
+    [40, 'Live demo', 4, 'Prove it works', 'Switch to the browser at once. Share, translate, accept, approve.'],
+    [90, 'Fair by design', 5, 'Trust', '"AI never scores, ranks or filters people."'],
+    [105, 'Close', 6, 'The ask', '"Let\'s pilot Skillink at the next Espoo event. Our target is 40%. Thank you."'],
+    [120, 'Q&A', 6, 'Questions', 'Stop talking. Leave the closing slide up.'],
+  ];
+  const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+
+  // Run-of-show table from the full plan
+  const rows = document.getElementById('show-rows');
+  FULL.forEach((r, i) => {
+    if (r[1] === 'Q&A') return;
+    const end = FULL[i + 1][0];
+    const tr = document.createElement('tr');
+    if (r[1] === 'Live demo') tr.className = 'demo';
+    tr.innerHTML = `<td class="t">${fmt(r[0])}–${fmt(end)}</td><td class="s">${r[2]}. ${r[1]}</td><td>${r[3]}</td><td class="say"></td>`;
+    tr.lastChild.textContent = r[4];
+    rows.appendChild(tr);
+  });
+
+  // Timer
+  let plan = FULL, start = 0, acc = 0, running = false, raf = 0;
+  const clock = document.getElementById('clock'), lbl = document.getElementById('now-label'),
+    sl = document.getElementById('now-slide'), say = document.getElementById('now-say'),
+    bar = document.getElementById('bar'), btn = document.getElementById('start');
+  function drawBar(idx) {
+    const total = plan[plan.length - 1][0];
+    bar.innerHTML = '';
+    plan.slice(0, -1).forEach((r, i) => {
+      const s = document.createElement('span');
+      s.style.width = `${((plan[i + 1][0] - r[0]) / total) * 100}%`;
+      if (i < idx) s.className = 'done'; else if (i === idx) s.className = 'cur';
+      bar.appendChild(s);
+    });
+  }
+  function paint() {
+    const t = acc + (running ? (performance.now() - start) / 1000 : 0);
+    const total = plan[plan.length - 1][0];
+    clock.textContent = fmt(t);
+    clock.classList.toggle('over', t > total);
+    let idx = 0;
+    plan.forEach((r, i) => { if (t >= r[0]) idx = i; });
+    const r = plan[idx];
+    lbl.textContent = t > total ? `Over time by ${fmt(t - total)}` : `Slide ${r[2]} of the deck`;
+    sl.textContent = r[1];
+    say.textContent = (t === 0 && !running) ? 'Press Start.' : r[4];
+    drawBar(idx);
+    if (running) raf = requestAnimationFrame(paint);
+  }
+  btn.addEventListener('click', () => {
+    if (running) { acc += (performance.now() - start) / 1000; running = false; cancelAnimationFrame(raf); btn.textContent = 'Resume'; }
+    else { start = performance.now(); running = true; btn.textContent = 'Pause'; }
+    paint();
+  });
+  document.getElementById('reset').addEventListener('click', () => {
+    running = false; acc = 0; cancelAnimationFrame(raf); btn.textContent = 'Start'; paint();
+  });
+  paint();
+
+  // Checklist ticks, per viewer
+  const KEY = 'skillink-pitch-checks';
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { saved = {}; }
+  document.querySelectorAll('.check input').forEach((box) => {
+    box.checked = !!saved[box.id];
+    box.addEventListener('change', () => {
+      saved[box.id] = box.checked;
+      try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) {}
+    });
+  });
+})();
+</script>

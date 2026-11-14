@@ -86,7 +86,9 @@ css/tokens.css        design tokens (Espoo blue brand palette, format colours, t
                       brand and neutral values and the favicon colour, nothing else in code
 css/app.css           layout and components, print styles
 js/app.js             hash router (#/recruiter/... → #/host/..., #/privacy/... → board),
-                      Talent / Employer switch
+                      Talent / Employer switch, header and footer text in the chosen language
+js/i18n.js            interface language (English, Suomi, Svenska): tr({ en, fi, sv }), header
+                      menu, per-viewer choice in localStorage key skillink.lang
 js/sides.js           switching sides in context: showEmployerSide(), showTalentSide(),
                       "See it as …" toast actions, counterpart() for the header switch
 js/store.js           state, server sync (or localStorage offline), meeting rules, identity
@@ -116,8 +118,9 @@ js/views/organizer.js    approval queue, exports, insights, opt-in, value report
 js/views/guide.js        step-by-step guide per side (#/guide/...), "Try it" deep links
 ```
 
-The guide's steps reference real seed data and exact UI labels. When you rename a button,
-change seed data or move a screen, update the matching step in `js/views/guide.js`.
+The guide's steps reference real seed data and exact UI labels, in all three languages (English in
+`GUIDES`, Finnish and Swedish in `TEXT`, same step order). When you rename a button, change seed
+data or move a screen, update the matching step in `js/views/guide.js` in every language.
 
 ## Role-switcher architecture
 
@@ -161,3 +164,9 @@ no ranking, side-by-side translation, consent withdrawal, and the 30-day purge
 - Identity reveal only through `canRevealIdentity()`; ordering of people-content is
   chronological or by challenge, and the UI says so. Intents are shown, never sorted or filtered on.
 - Keep copy in sentence case and plain language (format names excepted).
+- **Every interface text is trilingual**: write it as `tr({ en, fi, sv })` (or the views' `L(en, fi, sv)`)
+  from `js/i18n.js`, and escape the result with `esc()`. Never hard-code English in a view.
+  Not translated: what people wrote (challenges, answers, names), the four format names, the
+  slogan, and export files (.ics, Brella CSV, Tavata JSON) and Scala server error messages.
+- After user feedback the hero has no "Not needed here" list and the footer has no description
+  line, only the logo and the event.

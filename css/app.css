@@ -216,6 +216,50 @@ main:focus {
   color: var(--brand-900);
   box-shadow: var(--shadow-soft);
 }
+/* Interface language (English, Suomi, Svenska), the whole page follows it. */
+.langpick {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 0 0 0 var(--s3);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--brand-900);
+  background: var(--white);
+  cursor: pointer;
+}
+.langpick:hover {
+  background: var(--surface-quiet);
+}
+.langpick:focus-within {
+  outline: 3px solid var(--brand-700);
+  outline-offset: 2px;
+}
+.langpick svg {
+  flex: none;
+}
+.langpick select {
+  appearance: none;
+  width: auto;
+  min-height: 36px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 30px 0 2px;
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--brand-900);
+  background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23003580' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center;
+  cursor: pointer;
+}
+.langpick select:focus-visible {
+  outline: none;
+}
+.langpick option {
+  color: var(--ink);
+  background: var(--white);
+}
 .topbar__actions {
   display: flex;
   align-items: center;
@@ -971,30 +1015,6 @@ main {
   object-position: 48% 50%;
   filter: saturate(0.82);
 }
-.cvlines {
-  list-style: none;
-  padding: 0;
-  margin: var(--s6) 0 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  font-size: var(--fs-sm);
-  color: var(--text-3);
-}
-.cvlines__label {
-  flex-basis: 100%;
-  font-weight: 700;
-  color: var(--text-2);
-  margin-bottom: 2px;
-}
-.cvlines li:not(.cvlines__label) {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 4px 12px;
-  text-decoration: line-through;
-  text-decoration-thickness: 1.5px;
-}
 .realq {
   position: absolute;
   left: var(--s5);
@@ -1020,26 +1040,8 @@ main {
   color: var(--text-3);
 }
 @media (prefers-reduced-motion: no-preference) {
-  .cvlines li:not(.cvlines__label) {
-    animation: strike 0.5s var(--ease) both;
-  }
-  .cvlines li:nth-child(3) {
-    animation-delay: 0.12s;
-  }
-  .cvlines li:nth-child(4) {
-    animation-delay: 0.24s;
-  }
-  .cvlines li:nth-child(5) {
-    animation-delay: 0.36s;
-  }
   .realq {
     animation: rise 0.6s 0.45s var(--ease) both;
-  }
-}
-@keyframes strike {
-  from {
-    text-decoration-color: transparent;
-    color: var(--text-2);
   }
 }
 @keyframes rise {

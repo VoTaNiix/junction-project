@@ -10,6 +10,7 @@
 //  - Offline mode (any plain static server, e.g. py -m http.server): no /api, so the rules below
 //    run alone and the state lives in localStorage, as before.
 import { buildSeed } from './seed.js';
+import { tr } from './i18n.js';
 
 const KEY = 'skillink.v2';
 const OLD_KEYS = ['skillink.v1'];
@@ -206,7 +207,7 @@ export function revealedTo(companyId, participantId) {
 
 export function pseudoLabel(participantId) {
   const p = participant(participantId);
-  return p ? `Solver #${p.pseudo}` : 'Solver (deleted)';
+  return p ? `Solver #${p.pseudo}` : tr({ en: 'Solver (deleted)', fi: 'Solver (poistettu)', sv: 'Solver (raderad)' });
 }
 
 // ---------- meetings ----------
@@ -234,12 +235,12 @@ export function existingMeeting(participantId, challengeId) {
 
 export function requestMeeting(participantId, challengeId, slotId, format) {
   if (activeRequestCount(participantId) >= REQUEST_CAP) {
-    return { ok: false, error: `You have used all ${REQUEST_CAP} meeting requests. Cancel one to request another.` };
+    return { ok: false, error: tr({ en: 'You have used all {n} meeting requests. Cancel one to request another.', fi: 'Olet käyttänyt kaikki {n} tapaamispyyntöä. Peru yksi pyytääksesi uutta.', sv: 'Du har använt alla {n} mötesförfrågningar. Avbryt en för att begära en ny.' }, { n: REQUEST_CAP }) };
   }
   if (existingMeeting(participantId, challengeId)) {
-    return { ok: false, error: 'You already have a conversation request open for this challenge.' };
+    return { ok: false, error: tr({ en: 'You already have a conversation request open for this challenge.', fi: 'Sinulla on jo avoin keskustelupyyntö tähän haasteeseen.', sv: 'Du har redan en öppen samtalsförfrågan för den här utmaningen.' }) };
   }
-  if (slotTaken(slotId)) return { ok: false, error: 'That time was just taken. Pick another time.' };
+  if (slotTaken(slotId)) return { ok: false, error: tr({ en: 'That time was just taken. Pick another time.', fi: 'Aika varattiin juuri. Valitse toinen aika.', sv: 'Tiden blev just bokad. Välj en annan tid.' }) };
   const ch = challenge(challengeId);
   const id = uid('m');
   update((s) => {
@@ -255,9 +256,9 @@ export function requestMeeting(participantId, challengeId, slotId, format) {
 
 export function inviteParticipant(companyId, participantId, challengeId, slotId, format) {
   if (existingMeeting(participantId, challengeId)) {
-    return { ok: false, error: 'There is already an open conversation with this solver for this challenge.' };
+    return { ok: false, error: tr({ en: 'There is already an open conversation with this solver for this challenge.', fi: 'Tämän ratkaisijan kanssa on jo avoin keskustelu tästä haasteesta.', sv: 'Det finns redan ett öppet samtal med den här lösaren om den här utmaningen.' }) };
   }
-  if (slotTaken(slotId)) return { ok: false, error: 'That time is already booked. Pick another time.' };
+  if (slotTaken(slotId)) return { ok: false, error: tr({ en: 'That time is already booked. Pick another time.', fi: 'Aika on jo varattu. Valitse toinen aika.', sv: 'Tiden är redan bokad. Välj en annan tid.' }) };
   const id = uid('m');
   update((s) => {
     s.meetings.push({
@@ -307,13 +308,13 @@ export function organizerDecision(meetingId, approve) {
 
 /** One label used everywhere so a status reads the same in every role. */
 export function meetingStatus(m) {
-  if (m.partyStatus === 'cancelled') return { key: 'cancelled', label: 'Cancelled', tone: 'muted' };
-  if (m.partyStatus === 'declined') return { key: 'declined', label: 'Declined', tone: 'danger' };
-  if (m.organizerStatus === 'declined') return { key: 'org-declined', label: 'Declined by organizer', tone: 'danger' };
-  if (m.partyStatus === 'requested') return { key: 'requested', label: 'Waiting for host', tone: 'wait' };
-  if (m.partyStatus === 'invited') return { key: 'invited', label: 'Waiting for solver', tone: 'wait' };
-  if (m.organizerStatus === 'pending') return { key: 'mutual', label: 'Mutual, awaiting organizer', tone: 'info' };
-  return { key: 'confirmed', label: 'Confirmed', tone: 'ok' };
+  if (m.partyStatus === 'cancelled') return { key: 'cancelled', label: tr({ en: 'Cancelled', fi: 'Peruttu', sv: 'Avbruten' }), tone: 'muted' };
+  if (m.partyStatus === 'declined') return { key: 'declined', label: tr({ en: 'Declined', fi: 'Hylätty', sv: 'Avböjd' }), tone: 'danger' };
+  if (m.organizerStatus === 'declined') return { key: 'org-declined', label: tr({ en: 'Declined by organizer', fi: 'Järjestäjä hylkäsi', sv: 'Avböjd av arrangören' }), tone: 'danger' };
+  if (m.partyStatus === 'requested') return { key: 'requested', label: tr({ en: 'Waiting for host', fi: 'Odottaa yritystä', sv: 'Väntar på värden' }), tone: 'wait' };
+  if (m.partyStatus === 'invited') return { key: 'invited', label: tr({ en: 'Waiting for solver', fi: 'Odottaa ratkaisijaa', sv: 'Väntar på lösaren' }), tone: 'wait' };
+  if (m.organizerStatus === 'pending') return { key: 'mutual', label: tr({ en: 'Mutual, awaiting organizer', fi: 'Molemmat kyllä, odottaa järjestäjää', sv: 'Ömsesidigt, väntar på arrangören' }), tone: 'info' };
+  return { key: 'confirmed', label: tr({ en: 'Confirmed', fi: 'Vahvistettu', sv: 'Bekräftad' }), tone: 'ok' };
 }
 
 // ---------- participant workspace ----------
@@ -342,7 +343,7 @@ export function saveSubmission(participantId, challengeId, data, submit, opts) {
     }
     id = sub.id;
     if (sub.status === 'submitted' && !submit) {
-      result = { ok: false, error: 'This approach is already shared. Withdraw it first to edit it.' };
+      result = { ok: false, error: tr({ en: 'This approach is already shared. Withdraw it first to edit it.', fi: 'Tämä ajattelu on jo jaettu. Peru jako ensin muokataksesi sitä.', sv: 'Det här är redan delat. Dra tillbaka det först för att redigera.' }) };
       return;
     }
     Object.assign(sub, {
@@ -450,12 +451,12 @@ export function feedbackOutcome(meetingId) {
 
 // ---------- aggregates (anonymous, no individual profiling) ----------
 const THEMES = [
-  { id: 'data', label: 'Data and measurement', words: ['data', 'metric', 'measure', 'log', 'kpi', 'forecast', 'how many', 'how much', 'mitta', 'mätdata', 'hur många'] },
-  { id: 'people', label: 'Users, customers and residents', words: ['user', 'customer', 'resident', 'passenger', 'pedestrian', 'asiakas', 'käyttäjä', 'asukas', 'kund', 'användare', 'invånare'] },
-  { id: 'ownership', label: 'Ownership and decision-making', words: ['who ', 'owns', 'owner', 'decide', 'approv', 'legal', 'kuka', 'päättää', 'vem', 'äger'] },
-  { id: 'risk', label: 'Constraints, cost and safety', words: ['cost', 'budget', 'warranty', 'safety', 'risk', 'penalis', 'contract', 'worse', 'kustann', 'riski', 'säkerhet'] },
-  { id: 'access', label: 'Getting hands-on access', words: ['can i', 'visit', 'ride', 'read', 'remote access', 'on site', 'voinko', 'paikan päällä'] },
-  { id: 'success', label: 'Goals and what success means', words: ['success', 'goal', 'matters more', 'consider', 'onnistu', 'tavoite', 'mål', 'actually used'] },
+  { id: 'data', get label() { return tr({ en: 'Data and measurement', fi: 'Data ja mittaaminen', sv: 'Data och mätning' }); }, words: ['data', 'metric', 'measure', 'log', 'kpi', 'forecast', 'how many', 'how much', 'mitta', 'mätdata', 'hur många'] },
+  { id: 'people', get label() { return tr({ en: 'Users, customers and residents', fi: 'Käyttäjät, asiakkaat ja asukkaat', sv: 'Användare, kunder och invånare' }); }, words: ['user', 'customer', 'resident', 'passenger', 'pedestrian', 'asiakas', 'käyttäjä', 'asukas', 'kund', 'användare', 'invånare'] },
+  { id: 'ownership', get label() { return tr({ en: 'Ownership and decision-making', fi: 'Omistajuus ja päätöksenteko', sv: 'Ägarskap och beslutsfattande' }); }, words: ['who ', 'owns', 'owner', 'decide', 'approv', 'legal', 'kuka', 'päättää', 'vem', 'äger'] },
+  { id: 'risk', get label() { return tr({ en: 'Constraints, cost and safety', fi: 'Rajoitteet, kustannukset ja turvallisuus', sv: 'Begränsningar, kostnad och säkerhet' }); }, words: ['cost', 'budget', 'warranty', 'safety', 'risk', 'penalis', 'contract', 'worse', 'kustann', 'riski', 'säkerhet'] },
+  { id: 'access', get label() { return tr({ en: 'Getting hands-on access', fi: 'Pääsy käytännön tekemiseen', sv: 'Praktisk tillgång' }); }, words: ['can i', 'visit', 'ride', 'read', 'remote access', 'on site', 'voinko', 'paikan päällä'] },
+  { id: 'success', get label() { return tr({ en: 'Goals and what success means', fi: 'Tavoitteet ja onnistumisen mittarit', sv: 'Mål och vad framgång innebär' }); }, words: ['success', 'goal', 'matters more', 'consider', 'onnistu', 'tavoite', 'mål', 'actually used'] },
 ];
 
 function questionText(sub) {
@@ -475,7 +476,8 @@ export function themeCounts(subs) {
   return { counts, questions };
 }
 
-export const THEME_LABELS = Object.fromEntries(THEMES.map((t) => [t.id, t.label]));
+// Read on every access, so the labels follow the interface language.
+export const THEME_LABELS = new Proxy({}, { get: (_, id) => THEMES.find((t) => t.id === id)?.label });
 
 function emptyPersonAggregates() {
   return {

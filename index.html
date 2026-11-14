@@ -13,11 +13,12 @@
     <link rel="stylesheet" href="css/app.css" />
   </head>
   <body>
-    <a class="skip-link" href="#main">Skip to content</a>
+    <a class="skip-link" href="#main" id="skip-link">Skip to content</a>
+    <!-- Header and footer texts are set by js/app.js (paintChrome) in the chosen language. -->
 
     <header class="topbar">
       <div class="topbar__inner">
-        <a class="wordmark" href="#/participant/board" aria-label="Skillink home">
+        <a class="wordmark" href="#/participant/board" aria-label="Skillink home" id="home-link">
           <span class="wordmark__mark" aria-hidden="true"><span></span><span></span></span>
           <span class="wordmark__name">Skillink<span aria-hidden="true">.</span></span>
           <span class="wordmark__tag">Less Résumé. Less Pitch Deck. More Real You.</span>
@@ -30,6 +31,15 @@
           <a class="btn btn--sm btn--reset" href="#/organizer/queue" id="organizer-link">Event team</a>
           <a class="btn btn--sm btn--reset" href="#/guide/start" id="guide-link">Guide</a>
           <button type="button" class="btn btn--sm btn--reset" id="reset-demo">Reset demo data</button>
+          <label class="langpick">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+            <span class="sr-only" id="lang-label">Language</span>
+            <select id="ui-lang" aria-labelledby="lang-label">
+              <option value="en" lang="en">English</option>
+              <option value="fi" lang="fi">Suomi</option>
+              <option value="sv" lang="sv">Svenska</option>
+            </select>
+          </label>
         </div>
       </div>
     </header>
@@ -41,12 +51,11 @@
     <main id="main" tabindex="-1"></main>
 
     <footer class="site">
-      <a class="wordmark" href="#/participant/board" aria-label="Skillink home">
+      <a class="wordmark" href="#/participant/board" aria-label="Skillink home" id="footer-home">
         <span class="wordmark__mark" aria-hidden="true"><span></span><span></span></span>
         <span class="wordmark__name">Skillink<span aria-hidden="true">.</span></span>
       </a>
       <span id="footer-event"></span>
-      <span>Prototype. No algorithm ranks, scores or filters people or teams. Demo data stays on this computer.</span>
     </footer>
 
     <div class="toasts" id="toasts" role="status" aria-live="polite"></div>

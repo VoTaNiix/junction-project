@@ -3,6 +3,9 @@
 // matching screen: a challenge page opens that company's review dashboard, a conversation opens
 // the other side's Conversations tab, and so on.
 import { challenge, company, participant, setCurrentCompany, setCurrentParticipant, pseudoLabel } from './store.js';
+import { tr } from './i18n.js';
+
+const seeAs = (name) => tr({ en: 'See it as {name}', fi: 'Katso tilinä {name}', sv: 'Se det som {name}' }, { name });
 
 function go(hash, select) {
   const same = location.hash === hash;
@@ -23,12 +26,12 @@ export function showTalentSide(participantId, tab = 'meetings') {
 /** Toast action: "See it as Lumivirta Energy". */
 export function employerAction(companyId, tab = 'feed') {
   const c = company(companyId);
-  return { label: `See it as ${c ? c.name : 'the employer'}`, run: () => showEmployerSide(companyId, tab) };
+  return { label: seeAs(c ? c.name : tr({ en: 'the employer', fi: 'työnantaja', sv: 'arbetsgivaren' })), run: () => showEmployerSide(companyId, tab) };
 }
 
 /** Toast action: "See it as Solver #ESP-4821". */
 export function talentAction(participantId, tab = 'meetings') {
-  return { label: `See it as ${pseudoLabel(participantId)}`, run: () => showTalentSide(participantId, tab) };
+  return { label: seeAs(pseudoLabel(participantId)), run: () => showTalentSide(participantId, tab) };
 }
 
 /** Where the header switch should take you from the current screen. */

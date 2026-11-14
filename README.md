@@ -40,7 +40,8 @@ The run console prints:
 Skillink (blue palette) is running at http://localhost:8081
 ```
 
-Open **http://localhost:8081**. Both sides (Talent and Employer) and the Event team view share
+Open **http://localhost:8081**. The language menu in the header switches the whole site between
+English, Suomi and Svenska. Both sides (Talent and Employer) and the Event team view share
 the server's state, also across browser tabs. **Reset demo data** in the header restores the seed.
 
 To use another port, add `-Dskillink.port=8090` to the run configuration's VM options. If the run

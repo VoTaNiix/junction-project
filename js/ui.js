@@ -1,19 +1,19 @@
 // Small DOM helpers. No framework: views return HTML strings and bind events afterwards.
+import { tr, locale } from './i18n.js';
 
 const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 export const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ESC[c]);
 
-const FMT_LOCALE = 'en-GB';
 const TZ = 'Europe/Helsinki';
 
 export function fmtDate(iso, opts = {}) {
   if (!iso) return '';
   const d = iso.length === 10 ? new Date(`${iso}T12:00:00+02:00`) : new Date(iso);
-  return d.toLocaleDateString(FMT_LOCALE, { day: 'numeric', month: 'short', year: opts.year ? 'numeric' : undefined, weekday: opts.weekday ? 'short' : undefined, timeZone: TZ });
+  return d.toLocaleDateString(locale(), { day: 'numeric', month: 'short', year: opts.year ? 'numeric' : undefined, weekday: opts.weekday ? 'short' : undefined, timeZone: TZ });
 }
 
 export function fmtTime(iso) {
-  return new Date(iso).toLocaleTimeString(FMT_LOCALE, { hour: '2-digit', minute: '2-digit', timeZone: TZ });
+  return new Date(iso).toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit', timeZone: TZ });
 }
 
 export function fmtDateTime(iso) {
@@ -32,14 +32,14 @@ export function addDays(isoDate, n) {
 }
 
 export const LANGS = {
-  en: { label: 'English', native: 'English' },
-  fi: { label: 'Finnish', native: 'Suomi' },
-  sv: { label: 'Swedish', native: 'Svenska' },
-  other: { label: 'Other language', native: 'Other' },
+  en: { get label() { return tr({ en: 'English', fi: 'englanti', sv: 'engelska' }); }, native: 'English' },
+  fi: { get label() { return tr({ en: 'Finnish', fi: 'suomi', sv: 'finska' }); }, native: 'Suomi' },
+  sv: { get label() { return tr({ en: 'Swedish', fi: 'ruotsi', sv: 'svenska' }); }, native: 'Svenska' },
+  other: { get label() { return tr({ en: 'Other language', fi: 'muu kieli', sv: 'annat språk' }); }, native: 'Other' },
 };
 
 export function langName(sub) {
-  if (sub.lang === 'other') return sub.langOther || 'Other language';
+  if (sub.lang === 'other') return sub.langOther || LANGS.other.label;
   return (LANGS[sub.lang] || LANGS.other).label;
 }
 
@@ -89,7 +89,7 @@ export function openDialog({ title, body, onBind, wide = false }) {
   dlg.innerHTML = `
     <div class="dialog__head">
       <h2 id="dlg-title">${esc(title)}</h2>
-      <button type="button" class="btn btn--ghost btn--icon" data-close aria-label="Close dialog">✕</button>
+      <button type="button" class="btn btn--ghost btn--icon" data-close aria-label="${esc(tr({ en: 'Close dialog', fi: 'Sulje ikkuna', sv: 'Stäng dialogrutan' }))}">✕</button>
     </div>
     <div class="dialog__body">${body}</div>`;
   document.body.appendChild(dlg);
@@ -113,7 +113,7 @@ export function confirmDialog({ title, message, confirmLabel, danger = false }) 
       title,
       body: `<p>${message}</p>
         <div class="row row--end">
-          <button type="button" class="btn btn--ghost" data-close>Keep as is</button>
+          <button type="button" class="btn btn--ghost" data-close>${esc(tr({ en: 'Keep as is', fi: 'Jätä ennalleen', sv: 'Behåll som det är' }))}</button>
           <button type="button" class="btn ${danger ? 'btn--danger' : 'btn--primary'}" data-yes>${esc(confirmLabel)}</button>
         </div>`,
       onBind: (dlg, close) => {
@@ -130,11 +130,11 @@ export function confirmDialog({ title, message, confirmLabel, danger = false }) 
 
 // ---------- tabs (WAI-ARIA tabs pattern, links-based) ----------
 export function tabNav(role, tabs, active) {
-  return `<nav class="subnav" aria-label="Sections">
+  return `<nav class="subnav" aria-label="${esc(tr({ en: 'Sections', fi: 'Osiot', sv: 'Avsnitt' }))}">
     <ul>${tabs
       .map(
         (t) => `<li><a href="#/${role}/${t.id}" class="subnav__link" ${t.id === active ? 'aria-current="page"' : ''}>${esc(t.label)}${
-          t.count ? ` <span class="count" aria-label="${t.count} waiting">${t.count}</span>` : ''
+          t.count ? ` <span class="count" aria-label="${esc(tr({ en: '{n} waiting', fi: '{n} odottaa', sv: '{n} väntar' }, { n: t.count }))}">${t.count}</span>` : ''
         }</a></li>`,
       )
       .join('')}</ul>
@@ -144,7 +144,7 @@ export function tabNav(role, tabs, active) {
 /** Render bullet-formatted text ("- a\n- b") as a list, prose as paragraphs. */
 export function richText(text, format) {
   const t = String(text || '').trim();
-  if (!t) return '<p class="muted">No answer written.</p>';
+  if (!t) return `<p class="muted">${esc(tr({ en: 'No answer written.', fi: 'Ei vastausta.', sv: 'Inget svar skrivet.' }))}</p>`;
   const lines = t.split(/\n+/);
   if (format === 'bullets' || lines.every((l) => /^\s*[-•*]\s+/.test(l))) {
     return `<ul class="bullets">${lines.map((l) => `<li>${esc(l.replace(/^\s*[-•*]\s+/, ''))}</li>`).join('')}</ul>`;
