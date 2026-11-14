@@ -1,0 +1,22 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+
+# Local Claude Code settings (per machine)
+.claude/settings.local.json
+
+# Dependencies and build output (in case the second codebase brings them)
+node_modules/
+dist/
+build/
+.venv/
+__pycache__/
+
+# Secrets
+.env
+.env.*
+!.env.example
