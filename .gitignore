@@ -20,3 +20,13 @@ __pycache__/
 .env
 .env.*
 !.env.example
+
+# Scala / sbt
+target/
+project/target/
+project/project/
+.bsp/
+.metals/
+.bloop/
+# Saved demo state written by the Scala server
+data/*.json

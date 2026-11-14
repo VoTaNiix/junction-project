@@ -1,5 +1,5 @@
-// Synthetic Espoo ecosystem for the Skillink demo. All companies and people are fictional.
-// No demographic data of any kind is stored (see .claude/skills/eu-ai-act-compliance).
+// Synthetic Espoo ecosystem for the Skillink demo. All hosts and people are fictional.
+// No demographic or pedigree data of any kind is stored (see .claude/skills/eu-ai-act-and-fairness).
 
 const EVENT_DATE = '2026-11-26';
 const TZ = '+02:00'; // Finland, EET in November
@@ -21,26 +21,30 @@ function slotsFor(companyId, table) {
 }
 
 export function buildSeed() {
+  // Challenge hosts. The host contact is shown to a solver only after a mutual post-event opt-in.
   const companies = [
-    { id: 'c-lumi', name: 'Lumivirta Energy', sector: 'Energy', recruiter: 'Katja Salmi', recruiterEmail: 'katja.salmi@lumivirta.example.com' },
-    { id: 'c-sillat', name: 'Sillat Digital', sector: 'Public sector', recruiter: 'Joonas Aalto', recruiterEmail: 'joonas@sillat.example.com' },
-    { id: 'c-kesto', name: 'Kestomo Industrial', sector: 'Manufacturing', recruiter: 'Riikka Mäkelä', recruiterEmail: 'riikka.makela@kestomo.example.com' },
-    { id: 'c-qubit', name: 'Qubitti Labs', sector: 'Deep tech', recruiter: 'Ville Rantanen', recruiterEmail: 'ville@qubitti.example.com' },
-    { id: 'c-tukki', name: 'Tukki Software', sector: 'SaaS', recruiter: 'Maria Holm', recruiterEmail: 'maria.holm@tukki.example.com' },
-    { id: 'c-revon', name: 'Revontuli Mobility', sector: 'Mobility', recruiter: 'Anton Lehto', recruiterEmail: 'anton.lehto@revontuli.example.com' },
+    { id: 'c-lumi', name: 'Lumivirta Energy', sector: 'Energy', hostName: 'Katja Salmi', hostRole: 'Head of grid R&D', hostEmail: 'katja.salmi@lumivirta.example.com' },
+    { id: 'c-sillat', name: 'Sillat Digital', sector: 'Public sector', hostName: 'Joonas Aalto', hostRole: 'Service design lead', hostEmail: 'joonas@sillat.example.com' },
+    { id: 'c-kesto', name: 'Kestomo Industrial', sector: 'Manufacturing', hostName: 'Riikka Mäkelä', hostRole: 'Innovation manager', hostEmail: 'riikka.makela@kestomo.example.com' },
+    { id: 'c-qubit', name: 'Qubitti Labs', sector: 'Deep tech', hostName: 'Ville Rantanen', hostRole: 'Hardware R&D lead', hostEmail: 'ville@qubitti.example.com' },
+    { id: 'c-tukki', name: 'Tukki Build', sector: 'Construction', hostName: 'Maria Holm', hostRole: 'Circularity lead', hostEmail: 'maria.holm@tukki.example.com' },
+    { id: 'c-revon', name: 'Revontuli Mobility', sector: 'Mobility', hostName: 'Anton Lehto', hostRole: 'Autonomy team lead', hostEmail: 'anton.lehto@revontuli.example.com' },
   ];
 
   const challenges = [
     {
       id: 'ch-1',
       companyId: 'c-lumi',
-      title: 'Keep a neighbourhood microgrid stable when everyone charges at 17:30',
+      title: 'Clean energy microgrid load balancing',
+      summary: 'Keep a neighbourhood microgrid stable when everyone charges at 17:30.',
+      formats: ['hiring', 'rnd'],
       context:
-        'We run a pilot microgrid in Kera, Espoo: 400 homes, rooftop solar and a 2 MWh shared battery. On most days it works. On cold, still, cloudy evenings, electric cars plug in at the same time, the battery is already low and we import expensive peak power from the grid.',
+        'We run a pilot microgrid in Kera, Espoo: 400 homes, rooftop solar and a 2 MWh shared battery. On most days it works. On cold, still, cloudy evenings, electric cars plug in at the same time, the battery is already low and we import expensive peak power. We are hiring for our grid team and would welcome a thesis or joint research project on the forecasting side.',
       tricky:
         'Our demand forecast is accurate on average and wrong on exactly the days that matter. Every extra battery cycle shortens its life, and residents have only agreed to flexible charging on a voluntary basis.',
       escoTags: ['gt-smartgrid', 'gt-storage', 'gt-demand', 'ai-timeseries', 'gt-energy-eff'],
       language: 'English is fine',
+      languages: ['en'],
       industry: 'Energy',
       deadline: '2026-11-22',
       createdAt: '2026-11-03T09:00:00+02:00',
@@ -49,13 +53,16 @@ export function buildSeed() {
     {
       id: 'ch-2',
       companyId: 'c-sillat',
-      title: 'Make a city permit form work for someone in their third week in Finland',
+      title: 'Multilingual municipal service accessibility',
+      summary: 'Make a city permit form work for someone in their third week in Finland.',
+      formats: ['pilot', 'open'],
       context:
-        'We build digital services for Uusimaa municipalities. Our building and residence-related permit forms are available in Finnish, Swedish and English, yet newcomers abandon them at twice the rate of other residents and call the service desk instead.',
+        'We build digital services for Uusimaa municipalities. Our building and residence-related permit forms are available in Finnish, Swedish and English, yet newcomers abandon them at twice the rate of other residents and call the service desk instead. We want to pilot a fix with a specialist or a small team, and we are open to other ways of working together.',
       tricky:
         'Legal terms like "kotikunta" have no clean translation, every text change needs legal review, and the forms must meet WCAG 2.2 AA for screen-reader users in all three languages.',
       escoTags: ['sd-ux', 'sd-multilingual', 'sd-accessibility', 'sd-copy', 'sd-public'],
-      language: 'Finnish or English',
+      language: 'Finnish, Swedish, or English',
+      languages: ['fi', 'sv', 'en'],
       industry: 'Public sector',
       deadline: '2026-11-23',
       createdAt: '2026-11-03T14:00:00+02:00',
@@ -64,13 +71,16 @@ export function buildSeed() {
     {
       id: 'ch-3',
       companyId: 'c-kesto',
-      title: 'Our edge gateways go silent at −25 °C and nobody notices for hours',
+      title: 'Industrial edge IoT anomaly detection',
+      summary: 'Our edge gateways miss the anomalies that matter, then go silent at −25 °C.',
+      formats: ['pilot', 'hiring'],
       context:
-        'Kestomo retrofits sensors onto paper-mill and sawmill equipment. Each site has 10–40 edge gateways that pre-process vibration data. In winter, some outdoor gateways stop reporting and we only find out the next morning.',
+        'Kestomo retrofits sensors onto paper-mill and sawmill equipment. Each site has 10–40 edge gateways that pre-process vibration data and flag anomalies before a bearing fails. Most alerts we get are false alarms, and in winter some outdoor gateways stop reporting altogether until someone notices the next morning. We want a pilot partner for edge anomaly detection, and we are hiring an embedded engineer.',
       tricky:
-        "We cannot reproduce it in the office, the gateways run a customer-approved firmware image we can't change freely, and the sites are a four-hour drive away.",
-      escoTags: ['hw-iot', 'hw-edge', 'hw-reliability', 'sw-embedded', 'hw-industrial'],
-      language: 'Finnish B1+ required, English for team syncs',
+        "We cannot reproduce the cold failures in the office, the gateways run a customer-approved firmware image we can't change freely, the sites are a four-hour drive away, and one missed bearing fault stops a production line.",
+      escoTags: ['hw-iot', 'hw-edge', 'hw-anomaly', 'hw-reliability', 'sw-embedded', 'hw-industrial'],
+      language: 'English or Finnish',
+      languages: ['en', 'fi'],
       industry: 'Manufacturing',
       deadline: '2026-11-21',
       createdAt: '2026-11-04T10:00:00+02:00',
@@ -79,13 +89,16 @@ export function buildSeed() {
     {
       id: 'ch-4',
       companyId: 'c-qubit',
-      title: 'Who would pay for access to a 50-qubit system in 2027, and why?',
+      title: 'Cryogenic quantum control hardware packaging',
+      summary: 'Our control wiring heats the coldest stage of the fridge before we reach 50 qubits.',
+      formats: ['rnd', 'hiring'],
       context:
-        'We are a spin-out from Otaniemi research with a working superconducting prototype. The physics is ahead of our business: we have research partners, but no clear first paying customer segment.',
+        'We are a spin-out from Otaniemi research with a working superconducting prototype. Every qubit needs several control and readout lines running from room temperature down to 10 millikelvin. At 20 qubits it works. At 50, the wiring and packaging bring in more heat than the dilution refrigerator can remove.',
       tricky:
-        "Most 'quantum use cases' online are marketing. We need a segment with a real problem, a budget this year and the patience to co-develop with a 30-person company.",
-      escoTags: ['hw-quantum', 'b2b-gtm', 'b2b-ip', 'b2b-funding', 'b2b-negotiate'],
+        'Fewer, thinner cables mean more crosstalk and signal loss. Moving electronics into the cold means designing for temperatures most components were never tested at. Each cooldown takes two days, so every experiment counts.',
+      escoTags: ['hw-quantum', 'hw-cryo', 'hw-microelectronics', 'hw-thermal', 'rd-experiments'],
       language: 'English is fine',
+      languages: ['en'],
       industry: 'Deep tech',
       deadline: '2026-11-24',
       createdAt: '2026-11-04T15:30:00+02:00',
@@ -94,14 +107,17 @@ export function buildSeed() {
     {
       id: 'ch-5',
       companyId: 'c-tukki',
-      title: 'Half our new customers stop logging in after week two',
+      title: 'Circular construction material traceability',
+      summary: 'Reclaimed steel and timber lose their paperwork between demolition and the next building.',
+      formats: ['pilot', 'rnd'],
       context:
-        'Tukki makes scheduling software for Nordic home-care providers. Sales are growing, but around half of new customer accounts go quiet after the second week, and renewals suffer a year later.',
+        'Tukki Build dismantles office buildings in Espoo and reuses beams, timber and façade panels in new projects. A reclaimed steel beam is often as good as new, but by the time it reaches the next site nobody can prove where it came from, what load it carried or how it was treated. Structural engineers reject it, and it is recycled as scrap.',
       tricky:
-        'Our dashboards show where people stop, not why. Customers range from three-person family businesses to large wellbeing services counties, and many work in Swedish.',
-      escoTags: ['b2b-onboarding', 'b2b-success', 'sd-journey', 'ai-dataviz', 'ai-stats'],
-      language: 'Swedish & English',
-      industry: 'SaaS',
+        'Demolition crews have minutes, not hours, per component. Labels fall off, building records from the 1970s are on paper, and every certification body wants different evidence. Many of our site teams and partners work in Swedish.',
+      escoTags: ['ce-circular', 'ce-materials', 'ce-trace', 'ce-bim', 'gt-lca'],
+      language: 'English or Swedish',
+      languages: ['en', 'sv'],
+      industry: 'Construction',
       deadline: '2026-11-23',
       createdAt: '2026-11-05T11:00:00+02:00',
       coWritten: true,
@@ -109,13 +125,16 @@ export function buildSeed() {
     {
       id: 'ch-6',
       companyId: 'c-revon',
-      title: "Our shuttle's lidar sees ghosts in wet snow",
+      title: 'Autonomous last-mile delivery sensor fusion',
+      summary: "Our delivery robots' lidar sees ghosts in wet snow.",
+      formats: ['open'],
       context:
-        'Revontuli runs a low-speed autonomous shuttle between Tapiola and Otaniemi. In wet snow, the lidar reports phantom obstacles, the shuttle brakes, and passengers get frustrated. Dry snow is fine.',
+        'Revontuli runs a fleet of small autonomous delivery robots on the pavements between Tapiola and Otaniemi. In wet snow, the lidar reports phantom obstacles, the robot stops, and parcels arrive late. Dry snow is fine. We are open to hiring, a thesis or a startup pilot, whichever fits the person or team.',
       tricky:
-        'Filtering too much is a safety risk; filtering too little makes the service unusable. Labelled winter data is scarce, and the radar and camera disagree in different ways.',
+        'Filtering too much is a safety risk on a pavement full of people; filtering too little makes the service unusable. Labelled winter data is scarce, and the radar and camera disagree in different ways.',
       escoTags: ['ai-sensor-fusion', 'hw-lidar', 'ai-cv', 'ai-ml', 'sw-test'],
       language: 'English is fine',
+      languages: ['en'],
       industry: 'Mobility',
       deadline: '2026-11-22',
       createdAt: '2026-11-05T16:00:00+02:00',
@@ -123,8 +142,9 @@ export function buildSeed() {
     },
   ];
 
-  // Participants: a pseudonym plus the minimum contact data needed to meet.
-  // Name and email are revealed to a company only after a mutual meeting acceptance.
+  // Solvers: a pseudonym plus the minimum contact data needed to meet. No team name, employer,
+  // university or company size: name and email are revealed to a host only after a mutual
+  // meeting acceptance.
   const participants = [
     { id: 'p-4821', pseudo: 'ESP-4821', name: 'Sam Virtanen', email: 'sam.virtanen@example.com' },
     { id: 'p-2093', pseudo: 'ESP-2093', name: 'Lauri Nieminen', email: 'lauri.n@example.com' },
@@ -139,7 +159,7 @@ export function buildSeed() {
 
   const submissions = [
     {
-      id: 's-1', challengeId: 'ch-1', participantId: 'p-2093', lang: 'fi', format: 'bullets', status: 'submitted',
+      id: 's-1', challengeId: 'ch-1', participantId: 'p-2093', intent: 'talent', lang: 'fi', format: 'bullets', status: 'submitted',
       submittedAt: '2026-11-10T08:42:00+02:00', skills: ['gt-demand', 'ai-timeseries', 'gt-storage'],
       answers: {
         first: '- Kävisin läpi viime talven 15 minuutin mittausdatan ja etsisin päivät, jolloin ennuste meni eniten pieleen.\n- Merkitsisin ne säätietoihin: pakkanen, tyyni, pilvinen.\n- Rakentaisin yksinkertaisen säännön akulle ennen kuin koskisin malliin.',
@@ -155,113 +175,113 @@ export function buildSeed() {
       },
     },
     {
-      id: 's-2', challengeId: 'ch-2', participantId: 'p-7356', lang: 'sv', format: 'prose', status: 'submitted',
-      submittedAt: '2026-11-10T13:15:00+02:00', skills: ['sd-user-research', 'sd-multilingual', 'sd-copy'],
+      id: 's-2', challengeId: 'ch-2', participantId: 'p-7356', intent: 'partner', lang: 'sv', format: 'prose', status: 'submitted',
+      submittedAt: '2026-11-10T13:15:00+02:00', skills: ['sd-ux', 'sd-multilingual', 'sd-copy'],
       answers: {
-        first: 'Jag skulle sitta bredvid fem personer som nyligen flyttat till Esbo och se dem fylla i blanketten på riktigt, på sin egen telefon. Inte en enkät, utan att titta på var de stannar upp.',
+        first: 'Vi är en liten byrå för tjänstedesign med två personer. Som en pilot på sex veckor skulle vi sitta bredvid fem personer som nyligen flyttat till Esbo och se dem fylla i blanketten på riktigt, på sin egen telefon. Inte en enkät, utan att titta på var de stannar upp.',
         why: 'Problemet är sällan själva översättningen. Det är att juridiska begrepp som "hemkommun" förutsätter att man redan vet hur systemet fungerar. Om vi ser var folk fastnar kan vi skriva förklaringar i stället för bara översättningar.',
         questions: 'Vem äger texterna i dag, och får vi ändra dem utan att juristerna godkänner varje ord? Hur många ansökningar avbryts halvvägs? Finns det en svensk version som faktiskt används, eller bara en som finns?',
       },
       translations: {
         en: {
-          first: 'I would sit next to five people who recently moved to Espoo and watch them fill in the form for real, on their own phone. Not a survey, but watching where they stop.',
+          first: 'We are a small, two-person service design studio. As a six-week pilot, we would sit next to five people who recently moved to Espoo and watch them fill in the form for real, on their own phone. Not a survey, but watching where they stop.',
           why: 'The problem is rarely the translation itself. It is that legal terms like "municipality of residence" assume you already know how the system works. If we see where people get stuck, we can write explanations instead of just translations.',
           questions: 'Who owns the texts today, and can we change them without legal approving every word? How many applications are abandoned halfway? Is there a Swedish version that is actually used, or just one that exists?',
         },
         fi: {
-          first: 'Istuisin viiden hiljattain Espooseen muuttaneen ihmisen vieressä ja katsoisin, kun he täyttävät lomakkeen oikeasti omalla puhelimellaan. En tekisi kyselyä, vaan katsoisin, missä kohdassa he pysähtyvät.',
+          first: 'Olemme pieni, kahden hengen palvelumuotoilutoimisto. Kuuden viikon pilottina istuisimme viiden hiljattain Espooseen muuttaneen ihmisen vieressä ja katsoisimme, kun he täyttävät lomakkeen oikeasti omalla puhelimellaan. Emme tekisi kyselyä, vaan katsoisimme, missä kohdassa he pysähtyvät.',
           why: 'Ongelma on harvoin itse käännös. Ongelma on se, että juridiset käsitteet kuten "kotikunta" olettavat, että tietää jo, miten järjestelmä toimii. Kun näemme, mihin ihmiset juuttuvat, voimme kirjoittaa selityksiä pelkkien käännösten sijaan.',
           questions: 'Kuka omistaa tekstit tällä hetkellä, ja saammeko muuttaa niitä ilman, että juristit hyväksyvät jokaisen sanan? Kuinka moni hakemus keskeytyy puolivälissä? Onko olemassa ruotsinkielinen versio, jota oikeasti käytetään, vai vain sellainen, joka on olemassa?',
         },
       },
     },
     {
-      id: 's-3', challengeId: 'ch-1', participantId: 'p-1168', lang: 'en', format: 'prose', status: 'submitted',
+      id: 's-3', challengeId: 'ch-1', participantId: 'p-1168', intent: 'research', lang: 'en', format: 'prose', status: 'submitted',
       submittedAt: '2026-11-11T09:05:00+02:00', skills: ['gt-smartgrid', 'gt-storage'],
       answers: {
-        first: "I'd start by asking for one week of data from the worst January week and replaying it against the current battery schedule, hour by hour. Before any modelling, I want to see exactly when the battery runs empty.",
-        why: 'In my last project the forecast was fine; the dispatch logic was the weak point. It charged greedily at noon and had nothing left at 17:30. Replaying a bad week tells you which of the two is failing, cheaply.',
-        questions: 'Is the 2 MWh battery owned by you or by the housing company? Do you have a contract with the DSO that penalises peaks, or is this about resident bills? Who gets called when it goes wrong at night?',
+        first: "I'd start by asking for one week of data from the worst January week and replaying it against the current battery schedule, hour by hour. Before any modelling, I want to see exactly when the battery runs empty. That replay could be the first chapter of a thesis or a joint research project.",
+        why: 'In my research on neighbourhood batteries, the forecast was usually fine; the dispatch logic was the weak point. It charged greedily at noon and had nothing left at 17:30. Replaying a bad week tells you which of the two is failing, cheaply.',
+        questions: 'Is the 2 MWh battery owned by you or by the housing company? Do you have a contract with the DSO that penalises peaks, or is this about resident bills? Could the metering data be shared with a research group under a data agreement?',
       },
       translations: {
         fi: {
-          first: 'Aloittaisin pyytämällä yhden viikon dataa tammikuun pahimmalta viikolta ja ajaisin sen nykyistä akun aikataulua vasten tunti tunnilta. Ennen mallinnusta haluan nähdä tarkalleen, milloin akku tyhjenee.',
-          why: 'Edellisessä projektissani ennuste oli kunnossa; heikko kohta oli ohjauslogiikka. Se latasi ahneesti keskipäivällä, eikä illalla klo 17.30 ollut enää mitään jäljellä. Huonon viikon uudelleenajo kertoo halvalla, kumpi näistä pettää.',
-          questions: 'Omistatteko 2 MWh:n akun itse vai omistaako sen taloyhtiö? Onko teillä jakeluverkkoyhtiön kanssa sopimus, joka sakottaa huipuista, vai koskeeko tämä asukkaiden laskuja? Kenelle soitetaan, kun jokin menee vikaan yöllä?',
+          first: 'Aloittaisin pyytämällä yhden viikon dataa tammikuun pahimmalta viikolta ja ajaisin sen nykyistä akun aikataulua vasten tunti tunnilta. Ennen mallinnusta haluan nähdä tarkalleen, milloin akku tyhjenee. Tämä uudelleenajo voisi olla opinnäytetyön tai yhteisen tutkimushankkeen ensimmäinen luku.',
+          why: 'Naapurustoakkuja koskevassa tutkimuksessani ennuste oli yleensä kunnossa; heikko kohta oli ohjauslogiikka. Se latasi ahneesti keskipäivällä, eikä illalla klo 17.30 ollut enää mitään jäljellä. Huonon viikon uudelleenajo kertoo halvalla, kumpi näistä pettää.',
+          questions: 'Omistatteko 2 MWh:n akun itse vai omistaako sen taloyhtiö? Onko teillä jakeluverkkoyhtiön kanssa sopimus, joka sakottaa huipuista, vai koskeeko tämä asukkaiden laskuja? Voisiko mittausdatan jakaa tutkimusryhmälle datasopimuksella?',
         },
       },
     },
     {
-      id: 's-4', challengeId: 'ch-5', participantId: 'p-5540', lang: 'fi', format: 'prose', status: 'submitted',
-      submittedAt: '2026-11-11T15:40:00+02:00', skills: ['b2b-onboarding', 'sd-journey'],
+      id: 's-4', challengeId: 'ch-5', participantId: 'p-5540', intent: 'research', lang: 'fi', format: 'prose', status: 'submitted',
+      submittedAt: '2026-11-11T15:40:00+02:00', skills: ['ce-trace', 'ce-circular'],
       answers: {
-        first: 'Soittaisin kymmenelle asiakkaalle, jotka lopettivat kirjautumisen toisella viikolla, ja kysyisin, mitä he yrittivät tehdä viimeisellä kerralla. Samalla katsoisin tuotedatasta, mihin kohtaan heidän polkunsa katkesi.',
-        why: 'Data kertoo, missä ihmiset lopettavat, mutta ei sitä, miksi. Kymmenen puhelua on nopeampi kuin uusi dashboard, ja niistä saa lauseita, joita voi käyttää suoraan tuotteessa.',
-        questions: 'Kuka asiakkaalla oikeasti käyttää työkalua: se, joka osti sen, vai joku muu? Onko toisella viikolla jokin tapahtuma, kuten ensimmäinen lasku tai kokeilujakson loppu? Mitä te itse pidätte onnistuneena käyttöönottona?',
+        first: 'Seuraisin yhtä purkutyömaata kahden päivän ajan ja kirjaisin jokaisen kohdan, jossa rakennusosan tieto katoaa: purkuhetki, välivarasto, kuljetus ja vastaanotto uudella työmaalla. Samalla kävisin läpi, mitä todisteita rakennesuunnittelija oikeasti tarvitsee hyväksyäkseen uudelleenkäytetyn palkin.',
+        why: 'Ongelma ei ole ensisijaisesti tekninen, vaan se, että tieto kulkee monen eri ihmisen käsien kautta. Kun tiedämme, missä kohdassa ketju katkeaa, voimme suunnitella merkinnän, joka kestää juuri sen vaiheen. Teen diplomityötä materiaalipasseista, joten tämä sopisi tutkimusyhteistyöksi.',
+        questions: 'Mitä todisteita rakennesuunnittelijanne vaativat tänä päivänä? Onko teillä esimerkki rakennusosasta, joka hylättiin pelkästään puuttuvan tiedon takia? Saisiko tutkimuksessa käyttää työmaidenne dataa ja julkaista tulokset?',
       },
       translations: {
         en: {
-          first: 'I would call ten customers who stopped logging in during week two and ask what they were trying to do the last time. At the same time I would look at product data to see where their path broke off.',
-          why: 'Data tells you where people stop, but not why. Ten phone calls are faster than a new dashboard, and they give you sentences you can use directly in the product.',
-          questions: 'Who at the customer actually uses the tool: the person who bought it, or someone else? Is there an event in week two, like the first invoice or the end of the trial? What do you yourselves consider a successful onboarding?',
+          first: "I would follow one demolition site for two days and note every point where a component's information gets lost: the moment of dismantling, interim storage, transport and arrival at the new site. At the same time I would go through what evidence a structural engineer actually needs to accept a reused beam.",
+          why: 'The problem is not mainly technical. It is that the information passes through many different hands. Once we know where the chain breaks, we can design a label that survives exactly that stage. I am writing my master\'s thesis on material passports, so this would fit a research collaboration.',
+          questions: 'What evidence do your structural engineers require today? Do you have an example of a component that was rejected only because information was missing? Could the research use data from your sites and publish the results?',
         },
       },
     },
     {
-      id: 's-5', challengeId: 'ch-5', participantId: 'p-3307', lang: 'sv', format: 'bullets', status: 'submitted',
-      submittedAt: '2026-11-12T10:20:00+02:00', skills: ['b2b-onboarding', 'ai-stats', 'b2b-success'],
+      id: 's-5', challengeId: 'ch-5', participantId: 'p-3307', intent: 'partner', lang: 'sv', format: 'bullets', status: 'submitted',
+      submittedAt: '2026-11-12T10:20:00+02:00', skills: ['ce-trace', 'ce-materials', 'ce-bim'],
       answers: {
-        first: '- Dela upp kunderna efter vem som bjöd in vem under första veckan.\n- Jämför de som fick en kollega inbjuden med de som var ensamma i verktyget.\n- Prata med två kunder från varje grupp.',
-        why: '- B2B-verktyg dör ofta när bara en person använder dem.\n- Det är billigt att testa med data ni redan har.\n- Svaret ändrar vad onboardingen ska fokusera på.',
-        questions: '- Hur många användare har en typisk kund efter 30 dagar?\n- Har ni svenskspråkiga kunder som får onboarding på finska eller engelska?\n- Vem i ert team äger onboardingen i dag?',
+        first: '- Märk tio balkar och tio fasadpaneler på nästa rivning med NFC-taggar som tål väder.\n- Koppla varje tagg till foton, mått och den gamla ritningen redan på plats.\n- Följ dem till nästa bygge och mät hur lång tid det tar per komponent.',
+        why: '- Ett litet pilotprojekt visar snabbt om rivningsteamet hinner med.\n- Vi har byggt en enkel app för detta och kan anpassa den till era blanketter.\n- Om det fungerar för tio balkar vet vi vad som behövs för tusen.',
+        questions: '- Vilka uppgifter kräver er konstruktör för att godkänna en återanvänd balk?\n- Vem på arbetsplatsen skulle skanna taggarna, och har de tid?\n- Kan piloten köras på svenska med era partner i Västnyland?',
       },
       translations: {
         en: {
-          first: '- Split customers by who invited whom during the first week.\n- Compare those who got a colleague invited with those who were alone in the tool.\n- Talk to two customers from each group.',
-          why: '- B2B tools often die when only one person uses them.\n- It is cheap to test with data you already have.\n- The answer changes what onboarding should focus on.',
-          questions: '- How many users does a typical customer have after 30 days?\n- Do you have Swedish-speaking customers who get onboarding in Finnish or English?\n- Who in your team owns onboarding today?',
+          first: '- Tag ten beams and ten façade panels on the next demolition with weatherproof NFC tags.\n- Link each tag to photos, measurements and the old drawing while still on site.\n- Follow them to the next building and measure how long it takes per component.',
+          why: '- A small pilot quickly shows whether the demolition crew can keep up.\n- We have built a simple app for this and can adapt it to your forms.\n- If it works for ten beams, we know what is needed for a thousand.',
+          questions: '- What information does your structural engineer require to approve a reused beam?\n- Who on site would scan the tags, and do they have time?\n- Can the pilot run in Swedish with your partners in western Uusimaa?',
         },
         fi: {
-          first: '- Jaa asiakkaat sen mukaan, kuka kutsui kenet ensimmäisen viikon aikana.\n- Vertaa niitä, jotka saivat kollegan mukaan, niihin, jotka olivat työkalussa yksin.\n- Keskustele kahden asiakkaan kanssa kummastakin ryhmästä.',
-          why: '- B2B-työkalut kuolevat usein, kun vain yksi ihminen käyttää niitä.\n- Tämä on halpa testata datalla, joka teillä jo on.\n- Vastaus muuttaa sitä, mihin käyttöönoton pitää keskittyä.',
-          questions: '- Kuinka monta käyttäjää tyypillisellä asiakkaalla on 30 päivän jälkeen?\n- Onko teillä ruotsinkielisiä asiakkaita, jotka saavat käyttöönoton suomeksi tai englanniksi?\n- Kuka tiimissänne omistaa käyttöönoton tällä hetkellä?',
+          first: '- Merkitse seuraavassa purkukohteessa kymmenen palkkia ja kymmenen julkisivupaneelia säänkestävillä NFC-tageilla.\n- Liitä jokaiseen tagiin valokuvat, mitat ja vanha piirustus jo työmaalla.\n- Seuraa niitä seuraavalle työmaalle ja mittaa, kauanko yhteen rakennusosaan menee aikaa.',
+          why: '- Pieni pilotti näyttää nopeasti, ehtiikö purkutiimi mukaan.\n- Olemme rakentaneet tähän yksinkertaisen sovelluksen ja voimme sovittaa sen teidän lomakkeisiinne.\n- Jos se toimii kymmenelle palkille, tiedämme, mitä tarvitaan tuhannelle.',
+          questions: '- Mitä tietoja rakennesuunnittelijanne vaatii hyväksyäkseen uudelleenkäytetyn palkin?\n- Kuka työmaalla lukisi tagit, ja onko heillä aikaa?\n- Voiko pilotin toteuttaa ruotsiksi yhteistyökumppanienne kanssa Länsi-Uudellamaalla?',
         },
       },
     },
     {
-      id: 's-6', challengeId: 'ch-6', participantId: 'p-6612', lang: 'en', format: 'bullets', status: 'submitted',
+      id: 's-6', challengeId: 'ch-6', participantId: 'p-6612', intent: 'talent', lang: 'en', format: 'bullets', status: 'submitted',
       submittedAt: '2026-11-12T14:55:00+02:00', skills: ['ai-sensor-fusion', 'hw-lidar', 'sw-test'],
       answers: {
-        first: '- Collect 20 drives where ghosts appeared and 20 clean ones on the same route.\n- Label ghost points by hand for a few hundred frames.\n- Check if ghost points share intensity and range patterns.',
+        first: '- Collect 20 runs where ghosts appeared and 20 clean ones on the same route.\n- Label ghost points by hand for a few hundred frames.\n- Check if ghost points share intensity and range patterns.',
         why: '- Wet snow returns are usually low intensity and close range, so a simple filter might remove most of them.\n- Hand labels first, so we know what we are actually filtering.\n- Same route means weather is the main difference.',
-        questions: '- Does the radar see the same ghosts, or only the lidar?\n- What is worse for you: braking for a ghost, or missing a real pedestrian? Who decides that trade-off?\n- Can I ride in the shuttle on a snowy day?',
+        questions: '- Does the radar see the same ghosts, or only the lidar?\n- What is worse for you: stopping for a ghost, or missing a real pedestrian? Who decides that trade-off?\n- Can I follow a robot on its route on a snowy day?',
       },
       translations: {
         fi: {
           first: '- Kerää 20 ajoa, joissa haamuja esiintyi, ja 20 puhdasta ajoa samalla reitillä.\n- Merkitse haamupisteet käsin muutamasta sadasta kuvasta.\n- Tarkista, onko haamupisteillä yhteisiä intensiteetti- ja etäisyyskuvioita.',
           why: '- Märän lumen heijastukset ovat yleensä matalaintensiteettisiä ja lähellä, joten yksinkertainen suodatin voi poistaa suurimman osan.\n- Ensin käsin merkinnät, jotta tiedämme, mitä oikeasti suodatamme.\n- Sama reitti tarkoittaa, että sää on pääasiallinen ero.',
-          questions: '- Näkeekö tutka samat haamut, vai vain lidar?\n- Kumpi on teille pahempi: jarruttaminen haamun takia vai oikean jalankulkijan ohittaminen? Kuka päättää tästä kompromissista?\n- Pääsisinkö kyytiin lumisena päivänä?',
+          questions: '- Näkeekö tutka samat haamut, vai vain lidar?\n- Kumpi on teille pahempi: pysähtyminen haamun takia vai oikean jalankulkijan ohittaminen? Kuka päättää tästä kompromissista?\n- Voisinko seurata robottia sen reitillä lumisena päivänä?',
         },
       },
     },
     {
-      id: 's-7', challengeId: 'ch-4', participantId: 'p-8875', lang: 'en', format: 'prose', status: 'submitted',
-      submittedAt: '2026-11-13T09:30:00+02:00', skills: ['b2b-gtm', 'b2b-funding'],
+      id: 's-7', challengeId: 'ch-4', participantId: 'p-8875', intent: 'research', lang: 'en', format: 'prose', status: 'submitted',
+      submittedAt: '2026-11-13T09:30:00+02:00', skills: ['hw-cryo', 'hw-thermal', 'rd-experiments'],
       answers: {
-        first: "I'd make a list of twenty organisations in Finland and the Nordics that already pay for HPC time for chemistry or materials simulation, and interview five of them about which problems they currently give up on.",
-        why: "People who already pay for compute have budgets and know their pain. If none of their 'given up' problems fit a 50-qubit machine, that is worth knowing before building a sales team.",
-        questions: 'Are you selling machine access, or co-development projects? How much do research funders like Business Finland shape who your first customers are? What did the last customer who said no tell you?',
+        first: "I'd measure the heat load per line at each temperature stage before changing anything, using the next cooldown to compare three cable types side by side on spare lines. Then I'd model which lines really need to run all the way down, and which signals could be multiplexed at 4 kelvin.",
+        why: "My research is on thermal budgets in dilution refrigerators. In most setups I've measured, a few high-bandwidth lines cause most of the heat, not the cable count itself. Knowing that tells you whether you need better cables, cold electronics or both, and it is a natural thesis or joint research topic.",
+        questions: 'How much cooling power do you have at the mixing chamber, and how much is already used? Can a researcher get time on a cooldown, or are they all booked for the prototype? Would results be publishable, or is the packaging work under IP restrictions?',
       },
       translations: {
         fi: {
-          first: 'Tekisin listan kahdestakymmenestä organisaatiosta Suomessa ja Pohjoismaissa, jotka jo maksavat HPC-laskenta-ajasta kemian tai materiaalien simulointiin, ja haastattelisin viittä niistä siitä, mistä ongelmista he tällä hetkellä luopuvat.',
-          why: 'Ihmisillä, jotka jo maksavat laskennasta, on budjetti ja he tuntevat ongelmansa. Jos mikään heidän luopumistaan ongelmista ei sovi 50 kubitin koneelle, se on hyvä tietää ennen myyntitiimin rakentamista.',
-          questions: 'Myyttekö konekäyttöä vai yhteiskehitysprojekteja? Kuinka paljon tutkimusrahoittajat, kuten Business Finland, vaikuttavat siihen, keitä ensimmäiset asiakkaanne ovat? Mitä viimeisin kieltäytynyt asiakas teille sanoi?',
+          first: 'Mittaisin lämpökuorman linjaa kohden jokaisella lämpötilatasolla ennen kuin muuttaisin mitään, ja vertailisin seuraavan jäähdytyksen aikana kolmea kaapelityyppiä rinnakkain varalinjoilla. Sitten mallintaisin, mitkä linjat oikeasti täytyy viedä alimmalle tasolle asti ja mitkä signaalit voisi multipleksata 4 kelvinissä.',
+          why: 'Tutkin laimennusjäähdyttimien lämpöbudjetteja. Useimmissa mittaamissani järjestelmissä suurin osa lämmöstä tulee muutamasta laajakaistaisesta linjasta, ei kaapelien määrästä. Kun sen tietää, tietää myös, tarvitaanko parempia kaapeleita, kylmää elektroniikkaa vai molempia, ja aihe sopii luontevasti opinnäytetyöksi tai yhteistutkimukseksi.',
+          questions: 'Kuinka paljon jäähdytystehoa sekoituskammiossa on, ja kuinka paljon siitä on jo käytössä? Voiko tutkija saada aikaa jäähdytyskierrokselta, vai ovatko ne kaikki varattuja prototyypille? Saako tuloksia julkaista, vai koskevatko paketointityötä IPR-rajoitukset?',
         },
       },
     },
     {
-      id: 's-8', challengeId: 'ch-3', participantId: 'p-9214', lang: 'fi', format: 'bullets', status: 'submitted',
+      id: 's-8', challengeId: 'ch-3', participantId: 'p-9214', intent: 'talent', lang: 'fi', format: 'bullets', status: 'submitted',
       submittedAt: '2026-11-13T12:10:00+02:00', skills: ['hw-iot', 'hw-reliability', 'sw-embedded'],
       answers: {
         first: '- Laittaisin yhden gatewayn pakastimeen ja lokittaisin kaiken: virta, lämpötila, muisti, verkko.\n- Lisäisin heartbeat-viestin, joka hälyttää 5 minuutin hiljaisuudesta.\n- Katsoisin, sammuuko laite vai vain yhteys.',
@@ -277,7 +297,7 @@ export function buildSeed() {
       },
     },
     {
-      id: 's-9', challengeId: 'ch-2', participantId: 'p-4821', lang: 'en', format: 'bullets', status: 'submitted',
+      id: 's-9', challengeId: 'ch-2', participantId: 'p-4821', intent: 'open', lang: 'en', format: 'bullets', status: 'submitted',
       submittedAt: '2026-11-13T16:45:00+02:00', skills: ['sd-accessibility', 'sd-copy', 'sd-multilingual'],
       answers: {
         first: '- Test the current permit form with a screen reader and with the phone set to English.\n- Mark every term a newcomer would need to look up.\n- Rewrite the three worst steps in plain language, in all three languages.',
@@ -290,43 +310,48 @@ export function buildSeed() {
           why: '- Saavutettavuus- ja selkokieliongelmat menevät paljon päällekkäin.\n- Kolmen vaiheen uudelleenkirjoitus on tarpeeksi pieni testattavaksi kahdessa viikossa.\n- Se näyttää, onko ongelma sanoissa vai prosessissa.',
           questions: '- Mistä vaiheesta tulee nykyään eniten tukipuheluita?\n- Voimmeko julkaista selkokielisen tekstin, jonka juristit ovat tarkastaneet kerran, eikä sana kerrallaan?\n- Miten testaatte tällä hetkellä ruotsinkielisten asukkaiden kanssa?',
         },
-      },
-    },
-    {
-      id: 's-10', challengeId: 'ch-3', participantId: 'p-6612', lang: 'en', format: 'prose', status: 'submitted',
-      submittedAt: '2026-11-14T08:20:00+02:00', skills: ['hw-edge', 'hw-reliability'],
-      answers: {
-        first: "I'd check the gateway's watchdog and power logs from the night it went silent, then try to reproduce it in a cold chamber at the university lab in Otaniemi.",
-        why: 'Silence for hours means nothing is watching the watcher. Fixing alerting first stops the damage while we find the root cause.',
-        questions: 'Do you have remote access to the gateways? Which matters more to the plant: losing data, or losing control?',
-      },
-      translations: {
-        fi: {
-          first: 'Tarkistaisin gatewayn watchdog- ja virtalokit siltä yöltä, jolloin se hiljeni, ja yrittäisin toistaa vian Otaniemen yliopiston laboratorion kylmäkammiossa.',
-          why: 'Tuntien hiljaisuus tarkoittaa, ettei kukaan valvo valvojaa. Hälytysten korjaaminen ensin pysäyttää vahingot, kun etsimme juurisyytä.',
-          questions: 'Onko teillä etäyhteys gatewayhin? Kumpi on tehtaalle tärkeämpää: datan menetys vai ohjauksen menetys?',
+        sv: {
+          first: '- Testa den nuvarande tillståndsblanketten med en skärmläsare och med telefonen inställd på engelska.\n- Markera varje begrepp som en nyinflyttad skulle behöva slå upp.\n- Skriv om de tre sämsta stegen på klarspråk, på alla tre språken.',
+          why: '- Tillgänglighets- och klarspråksproblem överlappar mycket.\n- Att skriva om tre steg är litet nog att testa på två veckor.\n- Det visar om problemet ligger i orden eller i flödet.',
+          questions: '- Vilket steg ger flest supportsamtal i dag?\n- Kan vi publicera klarspråkstext som juristerna granskat en gång, inte ord för ord?\n- Hur testar ni i dag med svenskspråkiga invånare?',
         },
       },
     },
     {
-      id: 's-11', challengeId: 'ch-6', participantId: 'p-4821', lang: 'en', format: 'prose', status: 'submitted',
-      submittedAt: '2026-11-14T09:10:00+02:00', skills: ['ai-sensor-fusion', 'hw-lidar'],
+      id: 's-10', challengeId: 'ch-3', participantId: 'p-6612', intent: 'partner', lang: 'en', format: 'prose', status: 'submitted',
+      submittedAt: '2026-11-14T08:20:00+02:00', skills: ['hw-edge', 'hw-anomaly', 'hw-reliability'],
       answers: {
-        first: "I'd look at whether the ghosts move with the shuttle or stay fixed in the world. Snowflakes near the sensor move with you; real objects don't.",
-        why: 'It is a cheap test with existing logs, and it separates sensor noise from real detections without a new model.',
-        questions: 'How often do you clean or heat the lidar window during a route? Is there a safety driver log I could read?',
+        first: "As a six-week pilot, I'd run a lightweight anomaly model on three gateways at one site, next to your current alerts, and log every alert both systems raise. Alongside that I'd check the watchdog and power logs from the nights the gateways went silent.",
+        why: "I work as an independent edge-ML specialist. Running side by side shows whether the new model cuts false alarms without missing real bearing faults, and it doesn't touch the customer-approved firmware. Silence for hours also means nothing is watching the watcher, so alerting comes first.",
+        questions: 'Do you have remote access to the gateways? Which is worse for the plant: a false alarm or a missed fault? Who at the customer would need to approve a pilot?',
       },
       translations: {
         fi: {
-          first: 'Katsoisin, liikkuvatko haamut sukkulan mukana vai pysyvätkö ne paikallaan maailmassa. Anturin lähellä olevat lumihiutaleet liikkuvat mukanasi, oikeat esineet eivät.',
+          first: 'Kuuden viikon pilottina ajaisin kevyttä poikkeamamallia kolmessa gatewayssa yhdellä tehtaalla nykyisten hälytysten rinnalla ja kirjaisin jokaisen hälytyksen, jonka kumpikin järjestelmä antaa. Samalla tarkistaisin watchdog- ja virtalokit niiltä öiltä, jolloin gatewayt hiljenivät.',
+          why: 'Toimin itsenäisenä reunalaskennan koneoppimisasiantuntijana. Rinnakkainen ajo näyttää, vähentääkö uusi malli vääriä hälytyksiä ohittamatta oikeita laakerivikoja, eikä se koske asiakkaan hyväksymään laiteohjelmistoon. Tuntien hiljaisuus tarkoittaa myös, ettei kukaan valvo valvojaa, joten hälytykset tulevat ensin.',
+          questions: 'Onko teillä etäyhteys gatewayhin? Kumpi on tehtaalle pahempi: väärä hälytys vai ohitettu vika? Kenen asiakkaalla pitäisi hyväksyä pilotti?',
+        },
+      },
+    },
+    {
+      id: 's-11', challengeId: 'ch-6', participantId: 'p-4821', intent: 'talent', lang: 'en', format: 'prose', status: 'submitted',
+      submittedAt: '2026-11-14T09:10:00+02:00', skills: ['ai-sensor-fusion', 'hw-lidar'],
+      answers: {
+        first: "I'd look at whether the ghosts move with the robot or stay fixed in the world. Snowflakes near the sensor move with you; real objects don't.",
+        why: 'It is a cheap test with existing logs, and it separates sensor noise from real detections without a new model.',
+        questions: 'How often do you clean or heat the lidar window during a route? Is there a remote operator log I could read?',
+      },
+      translations: {
+        fi: {
+          first: 'Katsoisin, liikkuvatko haamut robotin mukana vai pysyvätkö ne paikallaan maailmassa. Anturin lähellä olevat lumihiutaleet liikkuvat mukanasi, oikeat esineet eivät.',
           why: 'Se on halpa testi olemassa olevilla lokeilla, ja se erottaa anturikohinan oikeista havainnoista ilman uutta mallia.',
-          questions: 'Kuinka usein lidarin ikkunaa puhdistetaan tai lämmitetään reitin aikana? Onko turvakuljettajan lokia, jota voisin lukea?',
+          questions: 'Kuinka usein lidarin ikkunaa puhdistetaan tai lämmitetään reitin aikana? Onko etäoperaattorin lokia, jota voisin lukea?',
         },
       },
     },
     {
       // Private draft: visible only to its author.
-      id: 's-12', challengeId: 'ch-1', participantId: 'p-4821', lang: 'en', format: 'bullets', status: 'draft',
+      id: 's-12', challengeId: 'ch-1', participantId: 'p-4821', intent: 'open', lang: 'en', format: 'bullets', status: 'draft',
       updatedAt: '2026-11-14T10:02:00+02:00', skills: ['gt-demand'],
       answers: {
         first: '- Plot battery state of charge against EV plug-in times for the ten worst evenings.',
@@ -346,26 +371,28 @@ export function buildSeed() {
     ...slotsFor('c-revon', 6),
   ];
 
+  // `format` is what the conversation is about, chosen by whoever requested or invited.
   const m = (id, o) => ({ id, createdAt: '2026-11-13T12:00:00+02:00', organizerStatus: 'pending', ...o });
   const meetings = [
-    m('m-1', { challengeId: 'ch-2', companyId: 'c-sillat', participantId: 'p-4821', slotId: 'sl-sillat-2', initiator: 'participant', partyStatus: 'accepted', organizerStatus: 'approved', createdAt: '2026-11-13T17:00:00+02:00' }),
-    m('m-2', { challengeId: 'ch-1', companyId: 'c-lumi', participantId: 'p-4821', slotId: 'sl-lumi-3', initiator: 'participant', partyStatus: 'requested', createdAt: '2026-11-14T10:05:00+02:00' }),
-    m('m-3', { challengeId: 'ch-1', companyId: 'c-lumi', participantId: 'p-2093', slotId: 'sl-lumi-1', initiator: 'recruiter', partyStatus: 'invited', createdAt: '2026-11-12T09:00:00+02:00' }),
-    m('m-4', { challengeId: 'ch-1', companyId: 'c-lumi', participantId: 'p-1168', slotId: 'sl-lumi-2', initiator: 'recruiter', partyStatus: 'accepted', createdAt: '2026-11-12T09:10:00+02:00' }),
-    m('m-5', { challengeId: 'ch-5', companyId: 'c-tukki', participantId: 'p-5540', slotId: 'sl-tukki-1', initiator: 'participant', partyStatus: 'requested', createdAt: '2026-11-12T16:00:00+02:00' }),
-    m('m-6', { challengeId: 'ch-5', companyId: 'c-tukki', participantId: 'p-3307', slotId: 'sl-tukki-2', initiator: 'participant', partyStatus: 'accepted', organizerStatus: 'approved', createdAt: '2026-11-12T11:00:00+02:00' }),
-    m('m-7', { challengeId: 'ch-4', companyId: 'c-qubit', participantId: 'p-8875', slotId: 'sl-qubit-1', initiator: 'participant', partyStatus: 'declined', createdAt: '2026-11-13T10:00:00+02:00' }),
-    m('m-8', { challengeId: 'ch-3', companyId: 'c-kesto', participantId: 'p-9214', slotId: 'sl-kesto-1', initiator: 'recruiter', partyStatus: 'accepted', organizerStatus: 'approved', createdAt: '2026-11-13T13:00:00+02:00' }),
-    m('m-9', { challengeId: 'ch-6', companyId: 'c-revon', participantId: 'p-4821', slotId: 'sl-revon-3', initiator: 'recruiter', partyStatus: 'invited', createdAt: '2026-11-14T11:00:00+02:00' }),
-    m('m-10', { challengeId: 'ch-6', companyId: 'c-revon', participantId: 'p-6612', slotId: 'sl-revon-1', initiator: 'participant', partyStatus: 'accepted', organizerStatus: 'approved', createdAt: '2026-11-12T15:30:00+02:00' }),
+    m('m-1', { challengeId: 'ch-2', companyId: 'c-sillat', participantId: 'p-4821', slotId: 'sl-sillat-2', format: 'open', initiator: 'participant', partyStatus: 'accepted', organizerStatus: 'approved', createdAt: '2026-11-13T17:00:00+02:00' }),
+    m('m-2', { challengeId: 'ch-1', companyId: 'c-lumi', participantId: 'p-4821', slotId: 'sl-lumi-3', format: 'hiring', initiator: 'participant', partyStatus: 'requested', createdAt: '2026-11-14T10:05:00+02:00' }),
+    m('m-3', { challengeId: 'ch-1', companyId: 'c-lumi', participantId: 'p-2093', slotId: 'sl-lumi-1', format: 'hiring', initiator: 'host', partyStatus: 'invited', createdAt: '2026-11-12T09:00:00+02:00' }),
+    m('m-4', { challengeId: 'ch-1', companyId: 'c-lumi', participantId: 'p-1168', slotId: 'sl-lumi-2', format: 'rnd', initiator: 'host', partyStatus: 'accepted', createdAt: '2026-11-12T09:10:00+02:00' }),
+    m('m-5', { challengeId: 'ch-5', companyId: 'c-tukki', participantId: 'p-5540', slotId: 'sl-tukki-1', format: 'rnd', initiator: 'participant', partyStatus: 'requested', createdAt: '2026-11-12T16:00:00+02:00' }),
+    m('m-6', { challengeId: 'ch-5', companyId: 'c-tukki', participantId: 'p-3307', slotId: 'sl-tukki-2', format: 'pilot', initiator: 'participant', partyStatus: 'accepted', organizerStatus: 'approved', createdAt: '2026-11-12T11:00:00+02:00' }),
+    m('m-7', { challengeId: 'ch-4', companyId: 'c-qubit', participantId: 'p-8875', slotId: 'sl-qubit-1', format: 'rnd', initiator: 'participant', partyStatus: 'declined', createdAt: '2026-11-13T10:00:00+02:00' }),
+    m('m-8', { challengeId: 'ch-3', companyId: 'c-kesto', participantId: 'p-9214', slotId: 'sl-kesto-1', format: 'hiring', initiator: 'host', partyStatus: 'accepted', organizerStatus: 'approved', createdAt: '2026-11-13T13:00:00+02:00' }),
+    m('m-9', { challengeId: 'ch-6', companyId: 'c-revon', participantId: 'p-4821', slotId: 'sl-revon-3', format: 'hiring', initiator: 'host', partyStatus: 'invited', createdAt: '2026-11-14T11:00:00+02:00' }),
+    m('m-10', { challengeId: 'ch-6', companyId: 'c-revon', participantId: 'p-6612', slotId: 'sl-revon-1', format: 'hiring', initiator: 'participant', partyStatus: 'accepted', organizerStatus: 'approved', createdAt: '2026-11-12T15:30:00+02:00' }),
+    m('m-11', { challengeId: 'ch-3', companyId: 'c-kesto', participantId: 'p-6612', slotId: 'sl-kesto-2', format: 'pilot', initiator: 'participant', partyStatus: 'accepted', createdAt: '2026-11-14T08:40:00+02:00' }),
   ];
 
   // Post-event private choices, keyed by meeting id. null = not answered yet.
   const feedback = {
-    'm-1': { participant: null, recruiter: null },
-    'm-6': { participant: 'continue', recruiter: 'continue' },
-    'm-8': { participant: 'continue', recruiter: 'notnow' },
-    'm-10': { participant: 'continue', recruiter: 'continue' },
+    'm-1': { participant: null, host: null },
+    'm-6': { participant: 'continue', host: 'continue' },
+    'm-8': { participant: 'continue', host: 'notnow' },
+    'm-10': { participant: 'continue', host: 'continue' },
   };
 
   const consents = Object.fromEntries(
@@ -373,9 +400,11 @@ export function buildSeed() {
   );
 
   return {
-    version: 1,
+    version: 2,
     event: {
-      name: 'Espoo Talent Match 2026',
+      name: 'Espoo Challenge Match 2026',
+      organizers: 'City of Espoo and Business Espoo',
+      tracks: 'Recruitment and matchmaking',
       date: EVENT_DATE,
       venue: 'Dipoli, Otaniemi',
       registrationOpens: '2026-11-07',

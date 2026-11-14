@@ -1,37 +1,67 @@
-/* Skillink design tokens — see .claude/skills/espoo-nordic-ui */
+/* Skillink design tokens — see .claude/skills/espoo-nordic-ui
+   Visual language ported from "Approach 2": calm sage greens, soft white cards, generous radii,
+   tight display type. This is the BLUE (Espoo) palette. The green project (Junction_Project) differs only in
+   the "Brand" and "Neutrals" blocks below; components never use raw hex values. */
 :root {
-  /* Palette */
+  /* Brand (Espoo blue) */
+  --brand-900: #003580; /* Espoo deep blue: primary buttons, active tab, selected states */
+  --brand-800: #00296a; /* primary hover */
+  --brand-700: #0050c8; /* links, focus ring (7:1 on white) */
+  --brand-200: #c6d6f0;
+  --brand-100: #e3ecfa; /* soft buttons, highlight panels */
+  --brand-50: #f0f5fd; /* notes, page-intro bands */
+  --brand-mark: #7f9fd3; /* second stroke of the logo mark */
+  --brand-dot: #4f79c4; /* the full stop in the wordmark */
+  --heading: var(--brand-900); /* headings in Espoo blue */
+  --hero-muted: #4d6a99; /* the quieter last line of the hero headline (5:1) */
+  --backdrop: rgba(0, 28, 70, 0.45);
+  --toast-bg: #102a52;
+  --shadow-tint: 0, 35, 85;
+
+  /* Neutrals (warm birch) */
+  --ink: #111827;
+  --ink-2: #3a4150;
+  --ink-3: #5b6271; /* 5.6:1 on --bg */
+  --white: #ffffff;
+  --paper: #f7f6f2; /* page background */
+  --paper-2: #efede6; /* quiet surfaces */
+  --hair: #e6e2d6; /* hairlines */
+  --hair-2: #dcd7c9; /* outlined buttons */
+  --edge: #8f897b; /* input boundaries, 3.5:1 on white */
+
+  /* Meaning colours (shared by both palettes) */
+  /* Espoo blue: Talent & Hiring badge */
   --trust-900: #003580;
-  --trust-800: #00296a;
   --trust-600: #0050c8;
   --trust-100: #e3ecfa;
   --trust-50: #f0f5fd;
-  --birch-50: #f7f6f2;
-  --birch-100: #efede6;
-  --birch-200: #e6e2d6;
-  --birch-400: #b9b3a3;
+  /* "A human confirmed it" */
   --pine-700: #1b5e20;
   --pine-100: #e3f0e3;
+  /* Waiting */
   --amber-800: #7a4f00;
   --amber-100: #fdf1d6;
+  /* Declined / destructive */
   --red-700: #a8231a;
   --red-100: #fbe6e4;
-  --ink: #111827;
-  --ink-2: #3a4150;
-  --ink-3: #5b6271;
-  --white: #ffffff;
+  /* Collaboration formats. All text pairs ≥ 7:1. */
+  --teal-800: #0b5563;
+  --teal-100: #ddf0f0;
+  --ochre-800: #7a3e00;
+  --ochre-100: #fbebda;
 
   /* Semantic */
-  --bg: var(--birch-50);
+  --bg: var(--paper);
   --surface: var(--white);
-  --surface-quiet: var(--birch-100);
-  --line: var(--birch-200);
-  --line-strong: var(--birch-400);
+  --surface-quiet: var(--paper-2);
+  --line: var(--hair);
+  --line-2: var(--hair-2);
+  --line-strong: var(--edge);
   --text: var(--ink);
   --text-2: var(--ink-2);
   --text-3: var(--ink-3);
-  --link: var(--trust-600);
-  --focus: var(--trust-600);
+  --link: var(--brand-700);
+  --focus: var(--brand-700);
 
   /* Type */
   --font-display: 'Schibsted Grotesk', 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -43,8 +73,12 @@
   --fs-md: 1.25rem;
   --fs-lg: 1.5625rem;
   --fs-xl: 1.953rem;
-  --fs-2xl: 2.441rem;
-  --fs-hero: clamp(2.6rem, 6.2vw, 4.6rem);
+  --fs-2xl: clamp(2rem, 3.2vw, 2.75rem);
+  --fs-hero: clamp(3rem, 5.4vw, 4.8rem);
+  /* Tight tracking on display sizes, as in Approach 2 */
+  --track-hero: -0.06em;
+  --track-display: -0.045em;
+  --track-title: -0.025em;
 
   /* Space (4px base) */
   --s1: 4px;
@@ -55,11 +89,29 @@
   --s6: 32px;
   --s7: 48px;
   --s8: 64px;
+  --s9: 96px;
 
-  --radius-sm: 6px;
-  --radius: 10px;
-  --radius-lg: 16px;
-  --shadow-raised: 0 1px 0 rgba(17, 24, 39, 0.04), 0 6px 18px -10px rgba(0, 53, 128, 0.25);
-  --maxw: 1180px;
+  /* Shape */
+  --radius-xs: 7px; /* tags */
+  --radius-sm: 10px; /* inputs, small buttons */
+  --radius-btn: 12px; /* buttons */
+  --radius: 18px; /* cards, panels, lists */
+  --radius-lg: 22px; /* hero, dialogs, page-intro bands */
+  --shadow-soft: 0 1px 5px rgba(0, 0, 0, 0.07);
+  --shadow-btn: 0 5px 14px rgba(var(--shadow-tint), 0.1);
+  --shadow-card: 0 18px 50px rgba(var(--shadow-tint), 0.08);
+  --shadow-raised: 0 10px 22px rgba(var(--shadow-tint), 0.1);
+  --shadow-dialog: 0 30px 100px rgba(0, 0, 0, 0.16);
+
+  /* Layout */
+  --maxw: 1260px;
+  --gutter: 38px;
+  --header-h: 76px;
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@media (max-width: 800px) {
+  :root {
+    --gutter: 23px;
+  }
 }

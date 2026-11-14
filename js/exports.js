@@ -1,6 +1,7 @@
 // Export utilities. Everything is generated in the browser and downloaded locally;
 // nothing is sent to a network endpoint.
 import { getState, isConfirmed, company, challenge, participant, slot, canRevealIdentity, pseudoLabel } from './store.js';
+import { format as fmtOf } from './formats.js';
 
 export function downloadFile(filename, mime, text) {
   const blob = new Blob([text], { type: mime });
@@ -20,7 +21,7 @@ export function confirmedMeetings() {
 
 function who(m) {
   const p = participant(m.participantId);
-  if (!p) return { label: 'Participant (deleted)', email: '' };
+  if (!p) return { label: 'Solver (deleted)', email: '' };
   return canRevealIdentity(m) ? { label: p.name, email: p.email } : { label: pseudoLabel(m.participantId), email: '' };
 }
 
@@ -57,6 +58,7 @@ export function buildIcs(meetings = confirmedMeetings()) {
     const c = company(m.companyId);
     const ch = challenge(m.challengeId);
     const p = who(m);
+    const f = fmtOf(m.format || 'open');
     lines.push(
       'BEGIN:VEVENT',
       `UID:${m.id}@skillink.espoo.example`,
@@ -65,7 +67,8 @@ export function buildIcs(meetings = confirmedMeetings()) {
       `DTEND:${icsDate(sl.end)}`,
       `SUMMARY:${icsText(`Skillink conversation: ${c.name} and ${p.label}`)}`,
       `LOCATION:${icsText(sl.location)}`,
-      `DESCRIPTION:${icsText(`Challenge: ${ch.title}\nA real conversation about a real problem. Approved by the City of Espoo event team.`)}`,
+      `CATEGORIES:${icsText(f.label)}`,
+      `DESCRIPTION:${icsText(`Challenge: ${ch.title}\nCollaboration format: ${f.label}\nA real conversation about a real problem. Approved by the City of Espoo event team.`)}`,
       'STATUS:CONFIRMED',
       'END:VEVENT',
     );
@@ -77,7 +80,7 @@ export function buildIcs(meetings = confirmedMeetings()) {
 // ---------- Brella / Tavata ----------
 // Generic schedule columns. Brella and Tavata publish their own import formats to customers;
 // map these columns to the current spec when connecting a real event.
-const BRELLA_COLUMNS = ['meeting_id', 'start_time', 'end_time', 'title', 'location', 'host_company', 'host_contact_email', 'guest_name', 'guest_email', 'challenge'];
+const BRELLA_COLUMNS = ['meeting_id', 'start_time', 'end_time', 'title', 'location', 'host_company', 'host_contact_email', 'guest_name', 'guest_email', 'challenge', 'collaboration_format'];
 
 const csvCell = (v) => {
   const t = String(v ?? '');
@@ -96,10 +99,11 @@ function row(m) {
     title: `Skillink: ${c.name}`,
     location: sl.location,
     host_company: c.name,
-    host_contact_email: c.recruiterEmail || '',
+    host_contact_email: c.hostEmail || '',
     guest_name: p.label,
     guest_email: p.email,
     challenge: ch.title,
+    collaboration_format: fmtOf(m.format || 'open').label,
   };
 }
 
@@ -129,6 +133,7 @@ export function buildTavataJson(meetings = confirmedMeetings()) {
             { role: 'guest', name: r.guest_name, email: r.guest_email },
           ],
           topic: r.challenge,
+          collaborationFormat: r.collaboration_format,
         };
       }),
     },
